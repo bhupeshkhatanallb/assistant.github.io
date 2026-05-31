@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEO Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#EF9F27;--gold-dark:#412402;--gold-light:#FAC775;
+  --bg:#0E0E0C;--bg2:#161614;--bg3:#1E1E1B;
+  --border:rgba(255,255,255,0.07);--text:#F0EDE6;--muted:#888780;--dim:#444441;
+  --teal:#1D9E75;--teal-light:#9FE1CB;--purple:#7F77DD;--purple-light:#CECBF6;
+  --blue:#378ADD;--blue-light:#B5D4F4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+input[type=number]{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 8px;font-family:'DM Mono',monospace;font-size:13px;width:100%;outline:none}
+input[type=number]:focus{border-color:var(--gold)}
+button{font-family:'DM Sans',sans-serif;cursor:pointer}
+
+/* HEADER */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;position:sticky;top:0;z-index:200}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold)}
+.logo span{color:var(--text)}
+.clock{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--gold);letter-spacing:2px}
+.date-txt{font-size:11px;color:var(--muted);text-align:right;margin-top:1px}
+.mode-bar{display:flex;align-items:center;gap:8px}
+.mbadge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;border:1px solid;flex-shrink:0}
+.mbadge.wd{background:rgba(239,159,39,0.1);border-color:rgba(239,159,39,0.3);color:var(--gold-light)}
+.mbadge.hd{background:rgba(127,119,221,0.15);border-color:rgba(127,119,221,0.4);color:#CECBF6}
+.mbadge .dot{width:6px;height:6px;border-radius:50%}
+.mbadge.wd .dot{background:var(--gold)}
+.mbadge.hd .dot{background:#7F77DD;animation:pulse 1.5s infinite}
+.htoggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;user-select:none;padding:4px 10px;border-radius:20px;border:1px solid var(--border);transition:all .2s}
+.htoggle:hover{border-color:rgba(127,119,221,0.4);color:#CECBF6}
+.tsw{width:30px;height:17px;border-radius:9px;background:var(--dim);position:relative;transition:background .2s;flex-shrink:0}
+.tsw.on{background:#7F77DD}
+.tkn{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:left .2s}
+.tsw.on .tkn{left:15px}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* NOW CARD */
+.now{margin:12px 16px;background:var(--gold-dark);border:1px solid var(--gold);border-radius:12px;padding:14px;overflow:hidden}
+.now.hm{background:#26215C;border-color:#7F77DD}
+.now-lbl{font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-light);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.hm .now-lbl{color:#CECBF6}
+.pls{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:pulse 1.5s infinite}
+.hm .pls{background:#7F77DD}
+.now-title{font-size:17px;font-weight:500;color:#fff;margin-bottom:4px;line-height:1.3}
+.now-desc{font-size:12px;color:var(--gold-light);line-height:1.5;margin-bottom:9px}
+.hm .now-desc{color:#CECBF6}
+.now-bar-bg{background:rgba(255,255,255,0.1);border-radius:4px;height:4px;margin-bottom:5px}
+.now-bar{height:4px;background:var(--gold);border-radius:4px;transition:width 1s linear}
+.hm .now-bar{background:#7F77DD}
+.now-ti{display:flex;justify-content:space-between;font-size:10px;color:rgba(250,199,117,0.6);font-family:'DM Mono',monospace}
+.hm .now-ti{color:rgba(206,203,246,0.6)}
+
+/* TABS */
+.tabs{display:flex;margin:0 16px 12px;background:var(--bg3);border-radius:10px;padding:3px;gap:2px}
+.tab{flex:1;padding:7px 2px;font-size:10px;font-weight:500;border:none;background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;transition:all .2s}
+.tab.active{background:var(--bg2);color:var(--gold);border:1px solid var(--border)}
+
+/* SCHEDULE BLOCKS */
+.wrap{padding:0 16px 100px}
+.sec-lbl{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 6px 2px}
+.dsec{margin-bottom:18px}
+.blk{display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:3px;transition:border-color .2s,opacity .2s}
+.blk.active-blk{border-color:var(--gold);box-shadow:0 0 0 1px rgba(239,159,39,0.2)}
+.blk.active-blk.ha{border-color:#7F77DD;box-shadow:0 0 0 1px rgba(127,119,221,0.2)}
+.blk.past{opacity:.38}
+.bt{min-width:80px;padding:9px 7px;font-size:10px;font-weight:500;font-family:'DM Mono',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;flex-shrink:0}
+.bc{flex:1;padding:8px 11px;background:var(--bg2)}
+.bt2{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px}
+.bs{font-size:11px;color:var(--muted);line-height:1.4}
+.pill{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;margin-top:3px}
+.abadge{font-size:10px;font-weight:500;color:var(--gold);background:rgba(239,159,39,0.12);border:1px solid rgba(239,159,39,0.3);padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-flex;align-items:center;gap:4px}
+.abadge.hb{color:#CECBF6;background:rgba(127,119,221,0.12);border-color:rgba(127,119,221,0.3)}
+
+/* COLOR HELPERS */
+.c-gold{background:#412402;color:#FAC775}
+.c-teal{background:#04342C;color:#9FE1CB}
+.c-purple{background:#26215C;color:#CECBF6}
+.c-blue{background:#042C53;color:#B5D4F4}
+.c-gray{background:#2C2C2A;color:#D3D1C7}
+.c-dark{background:#1a1a18;color:#FAC775}
+.c-dim{background:#1E1E1B;color:#888780}
+.c-pink{background:#4B1528;color:#F4C0D1}
+.c-green{background:#173404;color:#C0DD97}
+
+.p-mind{background:rgba(239,159,39,0.1);color:var(--gold)}
+.p-exam{background:rgba(127,119,221,0.15);color:var(--purple-light)}
+.p-gym{background:rgba(29,158,117,0.15);color:var(--teal-light)}
+.p-biz{background:rgba(239,159,39,0.15);color:var(--gold-light)}
+.p-if{background:rgba(239,159,39,0.1);color:var(--gold)}
+.p-income{background:rgba(255,255,255,0.06);color:var(--muted)}
+.p-growth{background:rgba(55,138,221,0.15);color:var(--blue-light)}
+.p-run{background:rgba(29,158,117,0.15);color:var(--teal-light)}
+.p-brain{background:rgba(127,119,221,0.15);color:var(--purple-light)}
+.p-fam{background:rgba(212,83,126,0.15);color:#F4C0D1}
+.p-rest{background:rgba(255,255,255,0.06);color:var(--muted)}
+.p-rec{background:rgba(55,138,221,0.12);color:var(--blue-light)}
+.p-eng{background:rgba(55,138,221,0.12);color:var(--blue-light)}
+.p-abs{background:rgba(99,153,34,0.18);color:#C0DD97}
+
+/* WORKOUT EXPAND inside gym block */
+.gym-expand-btn{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--teal-light);background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.2);border-radius:6px;padding:5px 10px;margin-top:6px;cursor:pointer;transition:all .2s;width:fit-content}
+.gym-expand-btn:hover{background:rgba(29,158,117,0.14)}
+.gym-panel{display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.gym-panel.open{display:block}
+.chev-sm{font-size:11px;transition:transform .2s}
+.chev-sm.rot{transform:rotate(180deg)}
+
+/* DAY BADGE row */
+.day-split-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.split-chip{font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;border:1px solid}
+
+/* WORKOUT TABLE */
+.ex-table{width:100%;border-collapse:collapse;margin-bottom:10px}
+.ex-table th{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:0 4px 6px 0;text-align:left;border-bottom:1px solid var(--border)}
+.ex-table th:nth-child(2),.ex-table th:nth-child(3){text-align:center;min-width:36px}
+.ex-table td{padding:7px 4px 7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;vertical-align:middle}
+.ex-table td:nth-child(2),.ex-table td:nth-child(3){text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px}
+.ex-num{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--bg3);font-size:9px;color:var(--muted);margin-right:5px;flex-shrink:0}
+.ex-name{font-weight:500;color:var(--text)}
+.ex-target{font-size:10px;color:var(--teal-light);margin-top:1px}
+
+/* ABS section inside panel */
+.abs-header{font-size:11px;font-weight:500;color:#C0DD97;text-transform:uppercase;letter-spacing:.08em;margin:12px 0 6px;display:flex;align-items:center;gap:6px}
+.abs-header::before{content:'';display:block;height:1px;width:100%;background:rgba(99,153,34,0.25);flex:1}
+.abs-table{width:100%;border-collapse:collapse;margin-bottom:10px}
+.abs-table td{padding:6px 4px 6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;vertical-align:middle}
+.abs-table td:nth-child(2),.abs-table td:nth-child(3){text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;min-width:36px}
+.abs-focus{font-size:10px;color:#9FE1CB;margin-top:1px}
+
+/* WEIGHT TRACKER */
+.tracker-box{background:var(--bg3);border-radius:10px;padding:12px;margin-top:10px}
+.tracker-title{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
+.tracker-title span{color:var(--gold)}
+.wk-tabs{display:flex;gap:4px;margin-bottom:10px}
+.wk-tab{padding:4px 10px;font-size:11px;font-weight:500;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.wk-tab.active{background:rgba(239,159,39,0.12);border-color:rgba(239,159,39,0.4);color:var(--gold)}
+.tr-row{display:grid;grid-template-columns:1fr 78px;align-items:center;gap:8px;margin-bottom:7px}
+.tr-name{font-size:12px;color:var(--text);line-height:1.3}
+.save-btn{width:100%;padding:9px;background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.25);color:var(--teal-light);border-radius:8px;font-size:12px;font-weight:500;margin-top:4px;transition:all .2s}
+.save-btn:active{background:rgba(29,158,117,0.2)}
+.saved-ok{text-align:center;font-size:11px;color:var(--teal-light);margin-top:5px;display:none}
+
+/* CARDIO NOTE */
+.cardio-note{background:rgba(55,138,221,0.07);border:1px solid rgba(55,138,221,0.18);border-radius:8px;padding:9px 11px;font-size:11px;color:var(--blue-light);margin-top:8px;line-height:1.5}
+.cardio-note strong{font-weight:500}
+
+/* WORKOUT TAB CARDS */
+.wo-day-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.wo-day-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.wo-day-hdr:active{background:var(--bg3)}
+.wo-day-title{font-size:14px;font-weight:500;color:var(--text)}
+.wo-day-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.wo-badge{font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;border:1px solid;flex-shrink:0}
+.wo-chev{font-size:14px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.wo-chev.rot{transform:rotate(180deg)}
+.wo-day-body{display:none;padding:0 14px 14px}
+.wo-day-body.open{display:block}
+
+/* ABS merged inside table */
+.abs-divider-row td{padding:0;border:none}
+.abs-divider-lbl{font-size:10px;font-weight:500;color:#9FE1CB;text-transform:uppercase;letter-spacing:.09em;padding:10px 0 4px;border-top:1px solid rgba(29,158,117,0.2);display:flex;align-items:center;gap:6px}
+.abs-divider-lbl::after{content:'';flex:1;height:1px;background:rgba(29,158,117,0.2)}
+.abs-num{background:rgba(29,158,117,0.15);color:#9FE1CB}
+.abs-focus{font-size:10px;color:#9FE1CB;margin-top:1px}
+
+/* BUSINESS TAB */
+.biz-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.biz-card-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.biz-card-hdr:active{background:var(--bg3)}
+.biz-phase-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0}
+.biz-card-title{font-size:13px;font-weight:500;color:var(--text)}
+.biz-card-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.biz-now-badge{font-size:9px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(226,75,74,0.15);color:#F09595;margin-left:6px;vertical-align:middle}
+.biz-chev{font-size:14px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.biz-chev.rot{transform:rotate(180deg)}
+.biz-card-body{display:none;padding:0 14px 14px}
+.biz-card-body.open{display:block}
+.biz-warn{background:rgba(239,159,39,0.08);border:1px solid rgba(239,159,39,0.2);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--gold-light);line-height:1.5;margin-bottom:12px}
+.biz-info{background:rgba(55,138,221,0.08);border:1px solid rgba(55,138,221,0.2);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--blue-light);line-height:1.5;margin-bottom:12px}
+.biz-success{background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.2);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--teal-light);line-height:1.5;margin-bottom:12px}
+.biz-step-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.biz-step{display:flex;gap:10px;align-items:flex-start;background:var(--bg3);border-radius:8px;padding:10px}
+.biz-step-num{font-size:10px;font-weight:500;color:var(--muted);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 6px;flex-shrink:0;margin-top:2px;white-space:nowrap}
+.critical-num{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.3);color:#F09595}
+.biz-step-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.biz-step-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.biz-tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;margin-top:5px;background:var(--bg2);color:var(--muted);border:1px solid var(--border)}
+.biz-tag.critical{background:rgba(226,75,74,0.1);color:#F09595;border-color:rgba(226,75,74,0.2)}
+.biz-tag.important{background:rgba(239,159,39,0.1);color:var(--gold-light);border-color:rgba(239,159,39,0.2)}
+.biz-tag.go{background:rgba(29,158,117,0.1);color:var(--teal-light);border-color:rgba(29,158,117,0.2)}
+.biz-checklist-lbl{font-size:10px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.biz-check-item{display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:5px;padding:6px 8px;background:var(--bg3);border-radius:6px}
+.biz-check-item::before{content:'□';color:var(--teal-light);font-size:12px;flex-shrink:0;margin-top:0px}
+
+/* STUDY TAB */
+.stab{flex:1;padding:6px 2px;font-size:10px;font-weight:500;border:none;background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;transition:all .2s}
+.stab.active{background:var(--bg2);color:var(--teal-light);border:1px solid rgba(29,158,117,0.3)}
+.st-phase-card{background:var(--bg2);border:1px solid var(--border);border-left-width:3px;border-radius:10px;padding:12px;margin-bottom:10px}
+.st-ph-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.st-ph-title{font-size:13px;font-weight:500;color:var(--text)}
+.st-ph-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;flex-shrink:0;white-space:nowrap}
+.st-ph-desc{font-size:11px;color:var(--muted);margin-bottom:8px}
+.st-topic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.st-topic{background:var(--bg3);border-radius:7px;padding:8px 9px}
+.st-topic-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px}
+.st-topic-sub{font-size:10px;color:var(--muted);line-height:1.4}
+.st-syl-section{background:var(--bg2);border:1px solid var(--border);border-left-width:3px;border-radius:10px;padding:12px;margin-bottom:10px}
+.st-syl-title{font-size:12px;font-weight:500;margin-bottom:8px}
+.st-syl-items{display:flex;flex-direction:column;gap:5px}
+.st-syl-item{font-size:11px;color:var(--muted);line-height:1.4;background:var(--bg3);border-radius:6px;padding:6px 8px}
+.st-syl-item strong{color:var(--text);font-weight:500}
+.st-res-list{display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
+.st-res{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px}
+.st-res-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.st-res-sub{font-size:11px;color:var(--muted);line-height:1.4}
+.st-tip{display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 11px;margin-bottom:7px}
+.st-tip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.st-tip-body{color:var(--muted);font-size:12px;line-height:1.5}
+.st-today-box{background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.25);border-radius:12px;padding:14px}
+.st-today-date{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--teal-light);margin-bottom:4px}
+.st-today-topic{font-size:16px;font-weight:500;color:#fff;margin-bottom:4px;line-height:1.3}
+.st-today-meta{font-size:12px;color:var(--muted)}
+.st-week-item{display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid var(--border);padding:8px 0}
+.st-week-item:last-child{border-bottom:none}
+.st-week-date{font-size:10px;font-weight:500;font-family:'DM Mono',monospace;color:var(--muted);min-width:44px;padding-top:2px}
+.st-week-topic{font-size:12px;color:var(--text);flex:1;line-height:1.4}
+.st-week-hrs{font-size:10px;color:var(--muted);flex-shrink:0;padding-top:2px}
+.ph-dot-p1{width:6px;height:6px;border-radius:50%;background:#1D9E75;flex-shrink:0;margin-top:5px}
+.ph-dot-p2{width:6px;height:6px;border-radius:50%;background:#378ADD;flex-shrink:0;margin-top:5px}
+.ph-dot-p3{width:6px;height:6px;border-radius:50%;background:#EF9F27;flex-shrink:0;margin-top:5px}
+.ph-dot-p4{width:6px;height:6px;border-radius:50%;background:#D85A30;flex-shrink:0;margin-top:5px}
+.ph-dot-mock{width:6px;height:6px;border-radius:50%;background:#D4537E;flex-shrink:0;margin-top:5px}
+.ph-dot-off{width:6px;height:6px;border-radius:50%;background:var(--dim);flex-shrink:0;margin-top:5px}
+
+/* GOAL CARDS */
+.goal-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.goal-icon-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.goal-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.goal-main{font-size:13px;font-weight:500}
+.goal-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.goal-body{font-size:12px;color:var(--muted);line-height:1.6}
+
+.info-box{background:rgba(239,159,39,0.06);border:1px solid rgba(239,159,39,0.15);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:12px;color:var(--muted);line-height:1.5}
+.info-box strong{color:var(--gold-light);font-weight:500}
+.green-box{background:rgba(29,158,117,0.06);border:1px solid rgba(29,158,117,0.15);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--muted);line-height:1.5}
+.green-box strong{color:var(--teal-light);font-weight:500}
+
+.qbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);padding:10px 16px;font-size:11px;font-style:italic;color:var(--muted);text-align:center;line-height:1.4}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo">CEO<span>Mode</span></div>
+    <div>
+      <div class="clock" id="clk">00:00:00</div>
+      <div class="date-txt" id="dtxt"></div>
+    </div>
+  </div>
+  <div class="mode-bar">
+    <div class="mbadge wd hidden" id="mwd"><div class="dot"></div>Weekday</div>
+    <div class="mbadge hd hidden" id="mhd"><div class="dot"></div><span id="mhdtxt">Sunday</span></div>
+    <label class="htoggle" onclick="toggleHoliday()">
+      <div class="tsw" id="tsw"><div class="tkn"></div></div>
+      <span id="tlbl">Mark as holiday</span>
+    </label>
+  </div>
+</div>
+
+<!-- NOW CARD -->
+<div class="now" id="nowCard">
+  <div class="now-lbl"><div class="pls"></div>Right now — do this</div>
+  <div class="now-title" id="nowT">Loading...</div>
+  <div class="now-desc" id="nowD"></div>
+  <div class="now-bar-bg"><div class="now-bar" id="nowB" style="width:0%"></div></div>
+  <div class="now-ti"><span id="nS"></span><span id="nL"></span><span id="nE"></span></div>
+  <div id="nTag"></div>
+</div>
+
+<!-- Storage setup banner (hidden once configured) -->
+<div id="storage-banner" style="display:none;margin:0 16px 10px;background:rgba(226,75,74,0.1);border:1px solid rgba(226,75,74,0.3);border-radius:10px;padding:10px 13px;gap:10px;align-items:flex-start;">
+  <div style="font-size:18px;flex-shrink:0;">⚙️</div>
+  <div>
+    <div style="font-size:12px;font-weight:500;color:#F09595;margin-bottom:3px;">Storage not configured — weights save locally only</div>
+    <div style="font-size:11px;color:rgba(240,149,149,0.8);line-height:1.5;">To save weights across devices: go to <strong style="color:#fff;">jsonbin.io</strong> → sign up free → create a bin → paste the Bin ID and Access Key into the two variables at the top of the JS. Takes 2 minutes.</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('today')" id="tab-today">Today</button>
+  <button class="tab" onclick="showTab('workout')" id="tab-workout">Workout</button>
+  <button class="tab" onclick="showTab('study')" id="tab-study">Study</button>
+  <button class="tab" onclick="showTab('biz')" id="tab-biz">Business</button>
+  <button class="tab" onclick="showTab('weekday')" id="tab-weekday">Schedule</button>
+  <button class="tab" onclick="showTab('goals')" id="tab-goals">Goals</button>
+</div>
+
+<div class="wrap">
+
+<!-- ═══ TODAY TAB ═══ -->
+<div id="view-today"><div id="today-container"></div></div>
+
+<!-- ═══ WORKOUT TAB ═══ -->
+<div id="view-workout" class="hidden">
+
+<div class="info-box" style="margin-bottom:12px;">
+  <strong>Phase 2 — Fat Burning Mode</strong> · Push/Pull/Legs · 6 days/week · 10–15 reps · Abs after every session · LISS cardio last · Progressive overload weekly.
+</div>
+
+<!-- Weekly split grid -->
+<div id="wo-split-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;"></div>
+
+<!-- PUSH DAY CARD -->
+<div class="wo-day-card" id="wdc-push">
+  <div class="wo-day-hdr" onclick="toggleWoDay('push')">
+    <div>
+      <div class="wo-day-title">Push Day <span style="font-size:11px;color:var(--muted);font-weight:400;">Mon &amp; Thu</span></div>
+      <div class="wo-day-sub">Chest · Shoulders · Triceps</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="wo-badge" style="background:rgba(239,159,39,0.12);color:var(--gold);border-color:rgba(239,159,39,0.3);">Push</span>
+      <span class="wo-chev" id="wchev-push">▼</span>
+    </div>
+  </div>
+  <div class="wo-day-body" id="wbody-push">
+    <table class="ex-table">
+      <thead><tr><th>#&nbsp;Exercise</th><th>Sets</th><th>Reps</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ex-num">1</span><span class="ex-name">Incline Bench Press</span><br><span class="ex-target">Upper Chest</span></td><td>3</td><td>10</td></tr>
+        <tr><td><span class="ex-num">2</span><span class="ex-name">Incline DB Press</span><br><span class="ex-target">Upper Chest</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">3</span><span class="ex-name">Flat DB Fly</span><br><span class="ex-target">Mid/Inner Chest</span></td><td>3</td><td>15</td></tr>
+        <tr><td><span class="ex-num">4</span><span class="ex-name">Machine Incline Press</span><br><span class="ex-target">Upper Chest</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">5</span><span class="ex-name">DB Shoulder Press</span><br><span class="ex-target">Front/Side Delts</span></td><td>3</td><td>10</td></tr>
+        <tr><td><span class="ex-num">6</span><span class="ex-name">Side Lateral Raises</span><br><span class="ex-target">Side Delts</span></td><td>3</td><td>15</td></tr>
+        <tr><td><span class="ex-num">7</span><span class="ex-name">Tricep Pushdown</span><br><span class="ex-target">Triceps</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">8</span><span class="ex-name">Skull Crushers</span><br><span class="ex-target">Triceps</span></td><td>3</td><td>12</td></tr>
+        <tr class="abs-divider-row"><td colspan="3"><div class="abs-divider-lbl" id="abs-lbl-push">Abs — Day 1 · Upper Abs</div></td></tr>
+        <tr><td><span class="ex-num abs-num">A1</span><span class="ex-name">Crunches</span><br><span class="abs-focus">Upper Abs</span></td><td>3</td><td>20</td></tr>
+        <tr><td><span class="ex-num abs-num">A2</span><span class="ex-name">Toe Touches</span><br><span class="abs-focus">Upper Abs</span></td><td>3</td><td>15</td></tr>
+      </tbody>
+    </table>
+    <div class="cardio-note"><strong>Order:</strong> Lifts → Abs → LISS Cardio (15–20 min treadmill / cycling / cross trainer) · Rest: 90s compound, 60s isolation</div>
+    <div class="tracker-box">
+      <div class="tracker-title">Weight tracker — <span>Push Day</span></div>
+      <div class="wk-tabs" id="wt-tabs-push-wo">
+        <button class="wk-tab active" onclick="switchWkWo('push',1,this)">Wk 1</button>
+        <button class="wk-tab" onclick="switchWkWo('push',2,this)">Wk 2</button>
+        <button class="wk-tab" onclick="switchWkWo('push',3,this)">Wk 3</button>
+        <button class="wk-tab" onclick="switchWkWo('push',4,this)">Wk 4</button>
+      </div>
+      <div id="wt-wo-push"></div>
+      <button class="save-btn" onclick="saveWoWeights('push')">Save weights</button>
+      <div class="saved-ok" id="wo-saved-push">✓ Saved!</div>
+    </div>
+  </div>
+</div>
+
+<!-- PULL DAY CARD -->
+<div class="wo-day-card" id="wdc-pull">
+  <div class="wo-day-hdr" onclick="toggleWoDay('pull')">
+    <div>
+      <div class="wo-day-title">Pull Day <span style="font-size:11px;color:var(--muted);font-weight:400;">Tue &amp; Fri</span></div>
+      <div class="wo-day-sub">Back · Biceps · Rear Delts · Traps</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="wo-badge" style="background:rgba(55,138,221,0.12);color:var(--blue-light);border-color:rgba(55,138,221,0.3);">Pull</span>
+      <span class="wo-chev" id="wchev-pull">▼</span>
+    </div>
+  </div>
+  <div class="wo-day-body" id="wbody-pull">
+    <table class="ex-table">
+      <thead><tr><th>#&nbsp;Exercise</th><th>Sets</th><th>Reps</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ex-num">1</span><span class="ex-name">Lat Pulldown</span><br><span class="ex-target">Lats (Width)</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">2</span><span class="ex-name">T-Bar Row</span><br><span class="ex-target">Mid Back</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">3</span><span class="ex-name">Seated Cable Row</span><br><span class="ex-target">Mid Back</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">4</span><span class="ex-name">Face Pulls</span><br><span class="ex-target">Rear Delts/Traps</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">5</span><span class="ex-name">DB Shrugs</span><br><span class="ex-target">Upper Traps</span></td><td>3</td><td>15</td></tr>
+        <tr><td><span class="ex-num">6</span><span class="ex-name">DB Bicep Curls</span><br><span class="ex-target">Biceps</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">7</span><span class="ex-name">Preacher Curls</span><br><span class="ex-target">Biceps (Peak)</span></td><td>3</td><td>12</td></tr>
+        <tr class="abs-divider-row"><td colspan="3"><div class="abs-divider-lbl" id="abs-lbl-pull">Abs — Day 2 · Lower Abs</div></td></tr>
+        <tr><td><span class="ex-num abs-num">A1</span><span class="ex-name">Reverse Crunches</span><br><span class="abs-focus">Lower Abs</span></td><td>3</td><td>15</td></tr>
+        <tr><td><span class="ex-num abs-num">A2</span><span class="ex-name">Leg Raises</span><br><span class="abs-focus">Lower Abs</span></td><td>3</td><td>12</td></tr>
+      </tbody>
+    </table>
+    <div class="cardio-note"><strong>Order:</strong> Lifts → Abs → LISS Cardio (15–20 min) · Rest: 90s compound, 60s isolation</div>
+    <div class="tracker-box">
+      <div class="tracker-title">Weight tracker — <span>Pull Day</span></div>
+      <div class="wk-tabs" id="wt-tabs-pull-wo">
+        <button class="wk-tab active" onclick="switchWkWo('pull',1,this)">Wk 1</button>
+        <button class="wk-tab" onclick="switchWkWo('pull',2,this)">Wk 2</button>
+        <button class="wk-tab" onclick="switchWkWo('pull',3,this)">Wk 3</button>
+        <button class="wk-tab" onclick="switchWkWo('pull',4,this)">Wk 4</button>
+      </div>
+      <div id="wt-wo-pull"></div>
+      <button class="save-btn" onclick="saveWoWeights('pull')">Save weights</button>
+      <div class="saved-ok" id="wo-saved-pull">✓ Saved!</div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGS DAY CARD -->
+<div class="wo-day-card" id="wdc-legs">
+  <div class="wo-day-hdr" onclick="toggleWoDay('legs')">
+    <div>
+      <div class="wo-day-title">Legs Day <span style="font-size:11px;color:var(--muted);font-weight:400;">Wed &amp; Sat</span></div>
+      <div class="wo-day-sub">Quads · Hamstrings · Glutes · Calves</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="wo-badge" style="background:rgba(127,119,221,0.12);color:var(--purple-light);border-color:rgba(127,119,221,0.3);">Legs</span>
+      <span class="wo-chev" id="wchev-legs">▼</span>
+    </div>
+  </div>
+  <div class="wo-day-body" id="wbody-legs">
+    <table class="ex-table">
+      <thead><tr><th>#&nbsp;Exercise</th><th>Sets</th><th>Reps</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ex-num">1</span><span class="ex-name">Barbell Squats</span><br><span class="ex-target">Quads/Glutes</span></td><td>4</td><td>10</td></tr>
+        <tr><td><span class="ex-num">2</span><span class="ex-name">Leg Extension</span><br><span class="ex-target">Quads</span></td><td>3</td><td>15</td></tr>
+        <tr><td><span class="ex-num">3</span><span class="ex-name">Leg Press</span><br><span class="ex-target">Quads/Glutes</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">4</span><span class="ex-name">Leg Curls</span><br><span class="ex-target">Hamstrings</span></td><td>3</td><td>12</td></tr>
+        <tr><td><span class="ex-num">5</span><span class="ex-name">Walking Lunges</span><br><span class="ex-target">Quads/Glutes</span></td><td>3</td><td>20 steps</td></tr>
+        <tr><td><span class="ex-num">6</span><span class="ex-name">Calf Raises</span><br><span class="ex-target">Calves</span></td><td>3</td><td>15</td></tr>
+        <tr><td><span class="ex-num">7</span><span class="ex-name">Back Extension</span><br><span class="ex-target">Lower Back/Glutes</span></td><td>3</td><td>15</td></tr>
+        <tr class="abs-divider-row"><td colspan="3"><div class="abs-divider-lbl" id="abs-lbl-legs">Abs — Day 3 · Obliques</div></td></tr>
+        <tr><td><span class="ex-num abs-num">A1</span><span class="ex-name">Bicycle Crunches</span><br><span class="abs-focus">Obliques</span></td><td>3</td><td>20 each</td></tr>
+        <tr><td><span class="ex-num abs-num">A2</span><span class="ex-name">Side Plank</span><br><span class="abs-focus">Obliques</span></td><td>3</td><td>30s each</td></tr>
+      </tbody>
+    </table>
+    <div class="cardio-note"><strong>Order:</strong> Lifts → Abs → LISS Cardio (15–20 min) · Rest: 90s compound, 60s isolation</div>
+    <div class="tracker-box">
+      <div class="tracker-title">Weight tracker — <span>Legs Day</span></div>
+      <div class="wk-tabs" id="wt-tabs-legs-wo">
+        <button class="wk-tab active" onclick="switchWkWo('legs',1,this)">Wk 1</button>
+        <button class="wk-tab" onclick="switchWkWo('legs',2,this)">Wk 2</button>
+        <button class="wk-tab" onclick="switchWkWo('legs',3,this)">Wk 3</button>
+        <button class="wk-tab" onclick="switchWkWo('legs',4,this)">Wk 4</button>
+      </div>
+      <div id="wt-wo-legs"></div>
+      <button class="save-btn" onclick="saveWoWeights('legs')">Save weights</button>
+      <div class="saved-ok" id="wo-saved-legs">✓ Saved!</div>
+    </div>
+  </div>
+</div>
+
+<!-- Progressive Overload card -->
+<div class="wo-day-card" id="wdc-po">
+  <div class="wo-day-hdr" onclick="toggleWoDay('po')">
+    <div>
+      <div class="wo-day-title">Progressive Overload Guide</div>
+      <div class="wo-day-sub">Slightly better than last week. Every week.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="wo-badge" style="background:rgba(239,159,39,0.12);color:var(--gold);border-color:rgba(239,159,39,0.3);">Key</span>
+      <span class="wo-chev" id="wchev-po">▼</span>
+    </div>
+  </div>
+  <div class="wo-day-body" id="wbody-po">
+    <div style="display:flex;flex-direction:column;gap:7px;padding-top:4px;">
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:500;color:var(--gold-light);margin-bottom:2px;">Add reps</div><div style="font-size:11px;color:var(--muted);">1–2 more reps, same weight. 12kg×10 → 12kg×12</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:500;color:var(--gold-light);margin-bottom:2px;">Add weight</div><div style="font-size:11px;color:var(--muted);">+1–2.5 kg when you hit top of rep range. 12kg×12 → 14kg×10</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:500;color:var(--gold-light);margin-bottom:2px;">Slow tempo</div><div style="font-size:11px;color:var(--muted);">3s down · 1s pause · 2s up. More time under tension = more growth.</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:500;color:var(--gold-light);margin-bottom:2px;">Better form</div><div style="font-size:11px;color:var(--muted);">Less momentum. Harder squeeze. Drop the ego. Quality beats weight every time.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end workout tab -->
+
+<!-- ═══ STUDY TAB ═══ -->
+<div id="view-study" class="hidden">
+
+<!-- Header -->
+<div style="background:linear-gradient(135deg,#04342C,#26215C);border-radius:12px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(29,158,117,0.15);border-radius:50%;"></div>
+  <div style="font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-light);margin-bottom:6px;">DHC Programmer Post — 3-Month Plan</div>
+  <div style="font-size:17px;font-weight:500;color:#fff;margin-bottom:5px;line-height:1.3;">Clear the exam. Become permanent staff at DHC.</div>
+  <div style="font-size:12px;color:rgba(159,225,203,0.7);line-height:1.5;">Starting 1 Jun 2026 · 1 hr/weekday · 3 hrs/Sunday · ~72 total study hours · Ready by 28 Aug</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:12px;">
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(159,225,203,0.6);margin-bottom:2px;">Total study hours</div><div style="font-size:16px;font-weight:500;color:#fff;">72 hrs</div></div>
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(159,225,203,0.6);margin-bottom:2px;">Ready-by date</div><div style="font-size:16px;font-weight:500;color:#fff;">28 Aug 2026</div></div>
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(159,225,203,0.6);margin-bottom:2px;">Core topics</div><div style="font-size:16px;font-weight:500;color:#fff;">13</div></div>
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(159,225,203,0.6);margin-bottom:2px;">Phases</div><div style="font-size:16px;font-weight:500;color:#fff;">4</div></div>
+  </div>
+</div>
+
+<!-- Sub-tabs for study -->
+<div style="display:flex;gap:4px;margin-bottom:14px;background:var(--bg3);border-radius:10px;padding:3px;" id="study-subtabs">
+  <button class="stab active" onclick="showStudy('overview')" id="stab-overview">Overview</button>
+  <button class="stab" onclick="showStudy('today-topic')" id="stab-today-topic">Today</button>
+  <button class="stab" onclick="showStudy('syllabus')" id="stab-syllabus">Syllabus</button>
+  <button class="stab" onclick="showStudy('resources')" id="stab-resources">Resources</button>
+  <button class="stab" onclick="showStudy('tips')" id="stab-tips">Tips</button>
+</div>
+
+<!-- OVERVIEW -->
+<div id="sp-overview">
+  <div class="st-phase-card" style="border-left:3px solid #1D9E75;">
+    <div class="st-ph-hdr"><div class="st-ph-title">Phase 1 — Technical Core</div><div class="st-ph-badge" style="background:rgba(29,158,117,0.15);color:var(--teal-light);">Jun 1–28 · ~45% weight</div></div>
+    <div class="st-ph-desc">Build the hardest, most weighted section first while you're fresh.</div>
+    <div class="st-topic-grid">
+      <div class="st-topic"><div class="st-topic-name">Data Structures & Algorithms</div><div class="st-topic-sub">Arrays, Linked Lists, Trees, Sorting, Big-O</div></div>
+      <div class="st-topic"><div class="st-topic-name">C Programming</div><div class="st-topic-sub">Pointers, Memory, Bitwise ops, File I/O</div></div>
+      <div class="st-topic"><div class="st-topic-name">Operating Systems</div><div class="st-topic-sub">Processes, Threads, Scheduling, Deadlock</div></div>
+      <div class="st-topic"><div class="st-topic-name">DBMS & SQL</div><div class="st-topic-sub">Normalization, Joins, Transactions, ACID</div></div>
+    </div>
+  </div>
+  <div class="st-phase-card" style="border-left:3px solid #378ADD;">
+    <div class="st-ph-hdr"><div class="st-ph-title">Phase 2 — Networking & Systems</div><div class="st-ph-badge" style="background:rgba(55,138,221,0.15);color:var(--blue-light);">Jun 29–Jul 19 · ~25% weight</div></div>
+    <div class="st-ph-desc">Networking is consistently high-weightage in court IT exams.</div>
+    <div class="st-topic-grid">
+      <div class="st-topic"><div class="st-topic-name">Computer Networks</div><div class="st-topic-sub">OSI, TCP/IP, DNS, HTTP, Ports, Subnetting</div></div>
+      <div class="st-topic"><div class="st-topic-name">Web Technologies</div><div class="st-topic-sub">HTTP vs HTTPS, Cookies, Sessions, REST</div></div>
+      <div class="st-topic"><div class="st-topic-name">Number Systems</div><div class="st-topic-sub">Binary, Octal, Hex, BCD, Logic Gates</div></div>
+      <div class="st-topic"><div class="st-topic-name">Software Engineering</div><div class="st-topic-sub">SDLC, Testing, UML basics, Agile</div></div>
+    </div>
+  </div>
+  <div class="st-phase-card" style="border-left:3px solid #EF9F27;">
+    <div class="st-ph-hdr"><div class="st-ph-title">Phase 3 — Aptitude & Awareness</div><div class="st-ph-badge" style="background:rgba(239,159,39,0.15);color:var(--gold-light);">Jul 20–Aug 9 · ~20% weight</div></div>
+    <div class="st-ph-desc">English, Reasoning, Quant, and GK.</div>
+    <div class="st-topic-grid">
+      <div class="st-topic"><div class="st-topic-name">Reasoning & Puzzles</div><div class="st-topic-sub">Series, Coding-Decoding, Blood Relations</div></div>
+      <div class="st-topic"><div class="st-topic-name">Quantitative Aptitude</div><div class="st-topic-sub">Profit/Loss, Interest, Mixtures, Time-Work</div></div>
+      <div class="st-topic"><div class="st-topic-name">English Language</div><div class="st-topic-sub">Idioms, Vocab, Grammar, Comprehension</div></div>
+      <div class="st-topic"><div class="st-topic-name">General Awareness</div><div class="st-topic-sub">Polity, Current Affairs, Science & Tech</div></div>
+    </div>
+  </div>
+  <div class="st-phase-card" style="border-left:3px solid #D85A30;">
+    <div class="st-ph-hdr"><div class="st-ph-title">Phase 4 — Revision + Mock Tests</div><div class="st-ph-badge" style="background:rgba(216,90,48,0.15);color:#F0997B;">Aug 10–28 · Consolidation</div></div>
+    <div class="st-ph-desc">Full-length timed mocks every Sunday + weekday quick-fire revision.</div>
+    <div class="st-topic-grid">
+      <div class="st-topic"><div class="st-topic-name">Mock Tests</div><div class="st-topic-sub">Testbook / Adda247 DHC series</div></div>
+      <div class="st-topic"><div class="st-topic-name">PYQ Analysis</div><div class="st-topic-sub">JJA 2018, NIC, SSC CHSL tech papers</div></div>
+      <div class="st-topic"><div class="st-topic-name">Weak Area Drill</div><div class="st-topic-sub">Focus on lowest mock scores</div></div>
+      <div class="st-topic"><div class="st-topic-name">Speed & Accuracy</div><div class="st-topic-sub">Negative marking strategy (−0.25)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TODAY'S TOPIC -->
+<div id="sp-today-topic" class="hidden">
+  <div id="study-today-card" style="margin-bottom:12px;"></div>
+  <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:8px;">Upcoming this week</div>
+  <div id="study-week-list"></div>
+</div>
+
+<!-- SYLLABUS -->
+<div id="sp-syllabus" class="hidden">
+  <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Based on DHC JJA pattern, Supreme Court Programmer syllabus, and topics from the 2018 paper.</div>
+  <div class="st-syl-section" style="border-left-color:#1D9E75;">
+    <div class="st-syl-title" style="color:var(--teal-light);">Section A — Computer Science Technical (~45–50 marks)</div>
+    <div class="st-syl-items">
+      <div class="st-syl-item"><strong>Data Structures:</strong> Arrays, Stacks, Queues, Linked Lists, Trees (BST, AVL), Heaps, Graphs</div>
+      <div class="st-syl-item"><strong>Algorithms:</strong> Sorting (Bubble, Merge, Quick), Searching, Time/Space Complexity, Recursion</div>
+      <div class="st-syl-item"><strong>C Programming:</strong> Pointers, Structures, File Handling, Pre/Post increment, Bitwise ops, Macros</div>
+      <div class="st-syl-item"><strong>OOP:</strong> Classes, Inheritance, Polymorphism, Encapsulation, Abstraction (Java/C++)</div>
+      <div class="st-syl-item"><strong>DBMS:</strong> ER Model, Normal Forms (1NF–BCNF), SQL Queries, Joins, Transactions, ACID, Keys</div>
+      <div class="st-syl-item"><strong>Operating Systems:</strong> Process states, CPU Scheduling, Memory Mgmt, Paging, Virtual Memory, Deadlock, File Systems</div>
+    </div>
+  </div>
+  <div class="st-syl-section" style="border-left-color:#378ADD;">
+    <div class="st-syl-title" style="color:var(--blue-light);">Section B — Networking & Web (~25 marks)</div>
+    <div class="st-syl-items">
+      <div class="st-syl-item"><strong>Computer Networks:</strong> OSI 7 layers, TCP/IP, IP addressing, Subnetting, MAC, ARP, DNS, DHCP, Ports, Protocols</div>
+      <div class="st-syl-item"><strong>Security:</strong> Encryption, Firewalls, VPN, SSL/TLS, Malware types, Virus/Antivirus</div>
+      <div class="st-syl-item"><strong>Web & Internet:</strong> HTTP vs HTTPS, Cookies, Sessions, URL, REST, Client-Server, Port 80/443</div>
+      <div class="st-syl-item"><strong>Number Systems:</strong> Binary, Octal, Hex conversions, BCD, ASCII, Logic Gates, Nibble/Byte</div>
+      <div class="st-syl-item"><strong>Storage & Hardware:</strong> SSD vs HDD, RAM types, Cache, KB/MB/GB hierarchy up to Exabyte/Zettabyte</div>
+      <div class="st-syl-item"><strong>Software:</strong> DLL, SaaS/IaaS/PaaS, IANA, Open Source, Virtualization basics</div>
+    </div>
+  </div>
+  <div class="st-syl-section" style="border-left-color:#EF9F27;">
+    <div class="st-syl-title" style="color:var(--gold-light);">Section C — Aptitude & GK (~20–25 marks)</div>
+    <div class="st-syl-items">
+      <div class="st-syl-item"><strong>English:</strong> Idioms/Phrases, Antonyms, Synonyms, One-word substitution, Fill-in-blanks, Comprehension</div>
+      <div class="st-syl-item"><strong>Quantitative:</strong> Profit/Loss, SI/CI, Mixtures, Ratio & Proportion, Time-Work, Pipes, Averages</div>
+      <div class="st-syl-item"><strong>Reasoning:</strong> Series (alpha-numeric), Coding-Decoding, Blood Relations, Directions, Seating, Puzzle</div>
+      <div class="st-syl-item"><strong>GK:</strong> Indian Polity, Constitution Articles, Science & Tech, Awards, Sports, Govt Schemes, Current Affairs</div>
+    </div>
+  </div>
+  <div style="background:rgba(239,159,39,0.08);border:1px solid rgba(239,159,39,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--gold-light);line-height:1.5;">
+    <strong style="color:#fff;font-weight:500;">Important:</strong> Expect C code snippets, SQL queries, DBMS normalization problems, and OS scheduling questions — not just definitions.
+  </div>
+</div>
+
+<!-- RESOURCES -->
+<div id="sp-resources" class="hidden">
+  <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:8px;">Books</div>
+  <div class="st-res-list">
+    <div class="st-res"><div class="st-res-name">Let Us C — Yashavant Kanetkar</div><div class="st-res-sub">Best for C programming with exercises. Read Ch 1–12 minimum.</div></div>
+    <div class="st-res"><div class="st-res-name">Data Structures Using C — Reema Thareja</div><div class="st-res-sub">Trees, Graphs, Sorting with code. Available on Anna's Archive.</div></div>
+    <div class="st-res"><div class="st-res-name">Database System Concepts — Silberschatz (Ch 1–12)</div><div class="st-res-sub">ER model, normalization, SQL, ACID. Don't read all 800 pages!</div></div>
+    <div class="st-res"><div class="st-res-name">Computer Networks — Forouzan (Ed. 4/5)</div><div class="st-res-sub">Best for OSI, TCP/IP, addressing. Focus on Ch 1–15.</div></div>
+    <div class="st-res"><div class="st-res-name">OS Concepts — Galvin (Ch 1–10)</div><div class="st-res-sub">CPU Scheduling, Memory, Deadlock chapters most exam-relevant.</div></div>
+    <div class="st-res"><div class="st-res-name">RS Aggarwal — Quantitative Aptitude & Reasoning</div><div class="st-res-sub">Standard book for aptitude section. Solve previous year chapters.</div></div>
+  </div>
+  <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin:12px 0 8px;">Online Resources</div>
+  <div class="st-res-list">
+    <div class="st-res"><div class="st-res-name">GeeksForGeeks — geeksforgeeks.org</div><div class="st-res-sub">Best for DSA, C, DBMS, OS, Networks theory + MCQs. Use GATE CS section.</div></div>
+    <div class="st-res"><div class="st-res-name">JavaTPoint — javatpoint.com</div><div class="st-res-sub">Clear concise notes for all CS topics. Good for quick revision.</div></div>
+    <div class="st-res"><div class="st-res-name">Testbook / Adda247 (app)</div><div class="st-res-sub">DHC-specific mock tests. 1 full mock per week in Phase 4. Free tier is enough.</div></div>
+    <div class="st-res"><div class="st-res-name">YouTube — Neso Academy</div><div class="st-res-sub">Best channel for Computer Networks and DBMS video lectures (free).</div></div>
+    <div class="st-res"><div class="st-res-name">YouTube — Jenny's Lectures CS/IT</div><div class="st-res-sub">Excellent for DSA, C programming, OS. Hindi medium. Perfect for DHC-level depth.</div></div>
+  </div>
+  <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin:12px 0 8px;">Previous Papers</div>
+  <div class="st-res-list">
+    <div class="st-res"><div class="st-res-name">DHC JJA 2017, 2018 papers</div><div class="st-res-sub">Full paper analysis — understand difficulty pattern for technical questions.</div></div>
+    <div class="st-res"><div class="st-res-name">NIC Scientist B & Technical Assistant papers</div><div class="st-res-sub">Very similar technical syllabus. Available on Testbook / Gradeup archives.</div></div>
+    <div class="st-res"><div class="st-res-name">SSC CHSL/CGL Computer Awareness sections</div><div class="st-res-sub">Good for hardware, software, networking MCQs at the right difficulty level.</div></div>
+    <div class="st-res"><div class="st-res-name">GATE CS previous year MCQ sections</div><div class="st-res-sub">Data Structures, DBMS, OS, Networks — pick objective questions only.</div></div>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div id="sp-tips" class="hidden">
+  <div class="st-tip"><div class="st-tip-dot" style="background:#EF9F27;"></div><div><strong style="color:var(--text);">Negative marking:</strong><span class="st-tip-body"> DHC uses −0.25 negative marking. Skip if you're less than 60% confident. Don't guess randomly.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#378ADD;"></div><div><strong style="color:var(--text);">C code trace questions:</strong><span class="st-tip-body"> These appear heavily. Practice predicting output without running code. Focus on pointers, post/pre-increment, and logical operators.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#1D9E75;"></div><div><strong style="color:var(--text);">DBMS normalization:</strong><span class="st-tip-body"> Expect 3–5 questions on normal forms (1NF–BCNF). "Initial Normal Form" does NOT exist — always pick "First Normal Form" as the lowest level.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#7F77DD;"></div><div><strong style="color:var(--text);">Port numbers to memorize:</strong><span class="st-tip-body"> HTTP=80, HTTPS=443, FTP=21, SSH=22, Telnet=23, DNS=53, SMTP=25, POP3=110. These appear every year.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#854F0B;"></div><div><strong style="color:var(--text);">Number conversions:</strong><span class="st-tip-body"> Practice decimal↔binary↔octal↔hex daily in Phase 1. 5 minutes/day builds speed. Use GeeksForGeeks practice MCQs.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#D85A30;"></div><div><strong style="color:var(--text);">Time strategy in exam:</strong><span class="st-tip-body"> Technical (CS) questions first — they carry more marks. Then aptitude. Leave ambiguous GK for the end. Target: 45 min tech · 30 min aptitude · 15 min GK · 10 min review.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#D4537E;"></div><div><strong style="color:var(--text);">Current affairs shortcut:</strong><span class="st-tip-body"> From 3 weeks before exam, read PIB.gov.in daily for 10 min. Focus on ISRO launches, govt schemes, awards — court exam favourites.</span></div></div>
+  <div class="st-tip"><div class="st-tip-dot" style="background:#0F6E56;"></div><div><strong style="color:var(--text);">MS Office questions:</strong><span class="st-tip-body"> Know MS Word shortcuts (Format Painter = Alt+Ctrl+C), PowerPoint (Ctrl+M = new slide), Excel basics. These give easy marks.</span></div></div>
+</div>
+
+</div><!-- end study tab -->
+
+<!-- ═══ BUSINESS TAB ═══ -->
+<div id="view-biz" class="hidden">
+
+<!-- Header card -->
+<div style="background:linear-gradient(135deg,#042C53,#26215C);border-radius:12px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(55,138,221,0.15);border-radius:50%;"></div>
+  <div style="font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--blue-light);margin-bottom:6px;">MyFiling.ai — Founder Blueprint</div>
+  <div style="font-size:17px;font-weight:500;color:#fff;margin-bottom:5px;line-height:1.3;">Your step-by-step plan from idea to revenue</div>
+  <div style="font-size:12px;color:rgba(181,212,244,0.7);line-height:1.5;">6 phases · Real actions only · Delhi HC first · ₹50K MRR by Month 12</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:12px;">
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(181,212,244,0.6);margin-bottom:2px;">Month 12 Target</div><div style="font-size:16px;font-weight:500;color:#fff;">₹50K+ MRR</div></div>
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(181,212,244,0.6);margin-bottom:2px;">Paying users target</div><div style="font-size:16px;font-weight:500;color:#fff;">50–100</div></div>
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(181,212,244,0.6);margin-bottom:2px;">Accuracy required</div><div style="font-size:16px;font-weight:500;color:#fff;">>90%</div></div>
+    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:rgba(181,212,244,0.6);margin-bottom:2px;">Launch price</div><div style="font-size:16px;font-weight:500;color:#fff;">₹799/mo</div></div>
+  </div>
+</div>
+
+<!-- THE ONE RULE -->
+<div style="background:rgba(226,75,74,0.1);border:1px solid rgba(226,75,74,0.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+  <div style="font-size:10px;font-weight:500;color:#F09595;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">The one rule that will save you</div>
+  <div style="font-size:12px;color:#F7C1C1;line-height:1.5;"><strong style="color:#fff;font-weight:500;">Delhi High Court only</strong> for the first 6 months. Depth of accuracy at one court is worth more than shallow coverage across five. Lawyers will forgive limited scope. They will never forgive a wrong answer.</div>
+</div>
+
+<!-- PHASE CARDS -->
+
+<!-- Phase 1 -->
+<div class="biz-card" id="bcard-1">
+  <div class="biz-card-hdr" onclick="toggleBiz(1)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="biz-phase-num" style="background:rgba(55,138,221,0.15);color:var(--blue-light);">1</div>
+      <div>
+        <div class="biz-card-title">Validate the Problem <span class="biz-now-badge">Do this now</span></div>
+        <div class="biz-card-sub">Weeks 1–6 · Before writing a single line of code</div>
+      </div>
+    </div>
+    <span class="biz-chev" id="bchev-1">▼</span>
+  </div>
+  <div class="biz-card-body" id="bbody-1">
+    <div class="biz-warn">Do not skip this. You need lawyers to confirm — in their own words — that this pain is real and they will pay to fix it.</div>
+    <div class="biz-step-list">
+      <div class="biz-step"><div class="biz-step-num critical-num">1.1</div><div><div class="biz-step-title">Share your survey aggressively</div><div class="biz-step-desc">Send Jotform survey to every lawyer you know. Post in Delhi Bar Association WhatsApp groups. Post on LinkedIn tagging "Delhi High Court", "advocates", "LegalTech India". Target: 50+ responses in 2 weeks.</div><span class="biz-tag critical">Do this week</span></div></div>
+      <div class="biz-step"><div class="biz-step-num critical-num">1.2</div><div><div class="biz-step-title">Have 15 real conversations with lawyers</div><div class="biz-step-desc">Not forms — real calls. Target junior advocates (25–32 yrs) at Delhi NCR chambers. Ask: "Walk me through the last time a filing was returned." Listen. Do NOT pitch yet.</div><span class="biz-tag critical">Most important step</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">1.3</div><div><div class="biz-step-title">Visit DHC registry in person</div><div class="biz-step-desc">Spend 2 days at the DHC filing counter. Watch filings being returned. Talk to registry staff. Observe which defects come up most. This is ground truth no survey can give you.</div><span class="biz-tag important">High value</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">1.4</div><div><div class="biz-step-title">Manually build a defects database</div><div class="biz-step-desc">From your interviews and registry visits, create a spreadsheet of every defect type you encounter. Name, frequency, cause, how it could be detected automatically. This becomes the foundation of your rules engine.</div><span class="biz-tag important">Foundation</span></div></div>
+    </div>
+    <div class="biz-checklist-lbl">Answer these before Phase 2</div>
+    <div class="biz-check-item">Are filings returned frequently enough for lawyers to care?</div>
+    <div class="biz-check-item">Which 5–8 defect types cause 80% of all rejections at DHC?</div>
+    <div class="biz-check-item">Will junior advocates use this or will seniors block it?</div>
+    <div class="biz-check-item">Is ₹999/month realistic or does pricing need to change?</div>
+    <div class="biz-check-item">Do lawyers have data privacy concerns about uploading client documents?</div>
+  </div>
+</div>
+
+<!-- Phase 2 -->
+<div class="biz-card" id="bcard-2">
+  <div class="biz-card-hdr" onclick="toggleBiz(2)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="biz-phase-num" style="background:rgba(99,153,34,0.15);color:#C0DD97;">2</div>
+      <div>
+        <div class="biz-card-title">Find a Legal Co-founder</div>
+        <div class="biz-card-sub">Weeks 4–10 · Your single biggest risk right now</div>
+      </div>
+    </div>
+    <span class="biz-chev" id="bchev-2">▼</span>
+  </div>
+  <div class="biz-card-body" id="bbody-2">
+    <div class="biz-warn">The rules engine is only as good as your legal knowledge. You need a lawyer deeply involved — not a monthly advisor, a partner who lives this problem. Without this, your accuracy will be questioned.</div>
+    <div class="biz-step-list">
+      <div class="biz-step"><div class="biz-step-num critical-num">2.1</div><div><div class="biz-step-title">Ideal co-founder profile</div><div class="biz-step-desc">Practicing advocate, 3–8 yrs experience, has personally felt the pain of filing rejections, open to tech, files regularly at DHC. Not retired, not consulting — a working advocate with equity stake, excited about the problem.</div><span class="biz-tag critical">Must have</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">2.2</div><div><div class="biz-step-title">Where to find them</div><div class="biz-step-desc">Your Phase 1 lawyer interviews — look for the ones who got excited and asked follow-up questions. Post in LegalTech India communities on LinkedIn. Reach out via NLU alumni networks (NLUD, NLU Delhi grads have the most DHC exposure).</div></div></div>
+      <div class="biz-step"><div class="biz-step-num">2.3</div><div><div class="biz-step-title">Fallback: law firm design partner</div><div class="biz-step-desc">If no co-founder, partner with a small firm (3–8 lawyers) as a design partner — free lifetime access in exchange for rule-writing expertise, real test filings, and credibility.</div><span class="biz-tag important">Good fallback</span></div></div>
+    </div>
+    <div class="biz-checklist-lbl">Also do in this phase</div>
+    <div class="biz-check-item">Register Private Limited company via Razorpay Rize or Startups.gov.in (₹8K–15K)</div>
+    <div class="biz-check-item">Secure myfiling.ai domain — register NOW before someone else does</div>
+    <div class="biz-check-item">Decide legal disclaimer and terms of service with co-founder before any user touches the product</div>
+    <div class="biz-check-item">Decide data retention policy (delete PDFs after analysis? 24hrs? 30 days?)</div>
+    <div class="biz-check-item">Set up data privacy policy — DPDP Act 2023 compliance is mandatory</div>
+  </div>
+</div>
+
+<!-- Phase 3 -->
+<div class="biz-card" id="bcard-3">
+  <div class="biz-card-hdr" onclick="toggleBiz(3)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="biz-phase-num" style="background:rgba(239,159,39,0.15);color:var(--gold-light);">3</div>
+      <div>
+        <div class="biz-card-title">Build the MVP — DHC Only</div>
+        <div class="biz-card-sub">Weeks 6–16 · Build the minimum. Ship fast. Improve after.</div>
+      </div>
+    </div>
+    <span class="biz-chev" id="bchev-3">▼</span>
+  </div>
+  <div class="biz-card-body" id="bbody-3">
+    <div class="biz-info">Your MVP doesn't need to be perfect. It needs to be <strong style="color:var(--blue-light);">accurate enough to be useful</strong> and honest about what it cannot do. Ship it with a clear disclaimer.</div>
+    <div class="biz-step-list">
+      <div class="biz-step"><div class="biz-step-num critical-num">3.1</div><div><div class="biz-step-title">Write the DHC rules engine first (no code yet)</div><div class="biz-step-desc">Document every detectable rule in a spreadsheet: Rule ID, rule text, what the tool checks, defect title, severity (Critical/Minor/Warning), page/section. Start with 8–10 rules causing 80% of rejections. This spreadsheet IS your product logic.</div><span class="biz-tag critical">Before coding</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">3.2</div><div><div class="biz-step-title">Build 2 screens only</div><div class="biz-step-desc">Screen 1: PDF upload + court selection. Screen 2: defect results with severity + page references + probability score. That is it. Stack: Next.js frontend, Python FastAPI backend, pdfplumber for text PDFs.</div><span class="biz-tag go">Scope discipline</span></div></div>
+      <div class="biz-step"><div class="biz-step-num critical-num">3.3</div><div><div class="biz-step-title">Test on 50 real filings before showing anyone</div><div class="biz-step-desc">Get 50 actual DHC filings — mix of passed and returned. Run through your tool. Manually verify every output. Accuracy target before pilot: 85%+. Below that — do not pilot yet. Fix the gaps first.</div><span class="biz-tag critical">Quality gate</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">3.4</div><div><div class="biz-step-title">Build the downloadable defect report</div><div class="biz-step-desc">A PDF report a junior can hand to their senior. Include MyFiling.ai logo, court name, date, file name, clean defect list with page references. When a senior sees this report, they become aware of you — it's free word-of-mouth marketing built into the product.</div><span class="biz-tag important">Viral loop</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">3.5</div><div><div class="biz-step-title">Add login + 3 free analyses/month</div><div class="biz-step-desc">Use Clerk or Supabase Auth. Free tier (3 analyses/month) from day one — no credit card required. Add Razorpay for paid subscriptions now so it's ready for launch.</div><span class="biz-tag go">Revenue ready</span></div></div>
+    </div>
+    <div class="biz-warn" style="margin-top:4px;">Do NOT build: bulk upload · team accounts · filing history · rule explanations · auto-corrections · multi-court support · API. Every feature added now delays launch by days.</div>
+  </div>
+</div>
+
+<!-- Phase 4 -->
+<div class="biz-card" id="bcard-4">
+  <div class="biz-card-hdr" onclick="toggleBiz(4)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="biz-phase-num" style="background:rgba(226,75,74,0.15);color:#F09595;">4</div>
+      <div>
+        <div class="biz-card-title">Closed Pilot with Real Users</div>
+        <div class="biz-card-sub">Weeks 16–22 · Most valuable 6 weeks of your journey</div>
+      </div>
+    </div>
+    <span class="biz-chev" id="bchev-4">▼</span>
+  </div>
+  <div class="biz-card-body" id="bbody-4">
+    <div class="biz-success">Every bug you find here is a bullet dodged. Treat every negative feedback as a gift — it's free consulting from your most important customers.</div>
+    <div class="biz-step-list">
+      <div class="biz-step"><div class="biz-step-num critical-num">4.1</div><div><div class="biz-step-title">Sign 3 pilot law firms (not individuals)</div><div class="biz-step-desc">Firms give you volume — a single junior at a 10-person firm may run 15–20 analyses in 6 weeks. Offer 60-day free access in exchange for: weekly feedback calls, permission to use anonymised filing patterns to improve accuracy, and a testimonial if satisfied.</div><span class="biz-tag critical">Key action</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">4.2</div><div><div class="biz-step-title">WhatsApp group with all pilot users</div><div class="biz-step-desc">Create "MyFiling.ai Pilot Team" group. When they find a bug, they report in 10 seconds. Respond to every message within 2 hours. Lawyers talk to each other — how you handle the pilot group becomes your reputation.</div><span class="biz-tag important">Trust builder</span></div></div>
+      <div class="biz-step"><div class="biz-step-num critical-num">4.3</div><div><div class="biz-step-title">Track accuracy obsessively</div><div class="biz-step-desc">Ask pilot users to report every missed defect and every false positive. Track in a spreadsheet. Target: end pilot with 90%+ accuracy. Below that — do not launch publicly. Fix the gaps first.</div><span class="biz-tag critical">Non-negotiable</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">4.4</div><div><div class="biz-step-title">Collect case studies, not just testimonials</div><div class="biz-step-desc">"This tool is great" is useless. "We caught a missing vakalatnama in 3 seconds for a ₹2 crore dispute" is powerful. Get specific stories with permission to publish. These will do more for your launch than any ad.</div><span class="biz-tag go">Marketing gold</span></div></div>
+    </div>
+    <div style="background:rgba(55,138,221,0.08);border:1px solid rgba(55,138,221,0.2);border-left:3px solid var(--blue);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--blue-light);line-height:1.5;">
+      <strong style="color:#fff;font-weight:500;">The one question to ask at end of pilot:</strong> "If we switched this off tomorrow, would you miss it?" If majority say yes — launch. If they say "useful but not essential" — more work to do.
+    </div>
+  </div>
+</div>
+
+<!-- Phase 5 -->
+<div class="biz-card" id="bcard-5">
+  <div class="biz-card-hdr" onclick="toggleBiz(5)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="biz-phase-num" style="background:rgba(127,119,221,0.15);color:var(--purple-light);">5</div>
+      <div>
+        <div class="biz-card-title">Public Launch</div>
+        <div class="biz-card-sub">Week 22–26 · Launch small, launch right</div>
+      </div>
+    </div>
+    <span class="biz-chev" id="bchev-5">▼</span>
+  </div>
+  <div class="biz-card-body" id="bbody-5">
+    <div class="biz-info">Do not launch to everyone at once. Launch to the legal community in Delhi first — tight, word-of-mouth driven. A big Product Hunt launch with no lawyer audience = 500 sign-ups and zero paying customers.</div>
+    <div class="biz-step-list">
+      <div class="biz-step"><div class="biz-step-num critical-num">5.1</div><div><div class="biz-step-title">Email your entire waitlist on Day 1</div><div class="biz-step-desc">Every email from your Jotform survey gets a personal-feeling message from you. Not a newsletter blast — a short direct message: "You signed up 3 months ago. MyFiling.ai is live for Delhi HC. Here is your free access." Subject: "Your free MyFiling.ai access is ready, [Name]"</div><span class="biz-tag critical">Day 1</span></div></div>
+      <div class="biz-step"><div class="biz-step-num critical-num">5.2</div><div><div class="biz-step-title">LinkedIn launch post with a real case study</div><div class="biz-step-desc">From your personal account — not the company page. Tell a real story from the pilot: "A junior caught a missing court fee error 10 minutes before filing a ₹50 lakh matter." Include a screenshot. Tag Delhi Bar Association. Human, specific, credible — beats any ad.</div><span class="biz-tag critical">Day 1</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">5.3</div><div><div class="biz-step-title">Approach Delhi Bar Association for formal tie-up</div><div class="biz-step-desc">Formal letter offering: free demo session for junior advocates, free access for DBA members for 30 days, co-branded "Filing Guide" for DHC. Bar association endorsement is worth more than any marketing spend.</div><span class="biz-tag important">Week 1–2</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">5.4</div><div><div class="biz-step-title">Partner with one law school</div><div class="biz-step-desc">NLU Delhi, Faculty of Law DU, or Amity Law School. Free access for their legal aid clinic and moot court. Law students graduate and become junior advocates in 1–3 years. One partnership = 300–500 future users.</div><span class="biz-tag go">Long-term pipeline</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">5.5</div><div><div class="biz-step-title">Launch pricing: Free + Pro at ₹799/month</div><div class="biz-step-desc">Start below target ₹999 as early-bird rate. Announce: "Launch pricing — ₹799/month for first 100 users, then ₹999." Monthly subscriptions only — no annual plans yet. Introduce annual plans once you have proven 3-month retention.</div><span class="biz-tag go">Pricing</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 6 -->
+<div class="biz-card" id="bcard-6">
+  <div class="biz-card-hdr" onclick="toggleBiz(6)">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="biz-phase-num" style="background:rgba(55,138,221,0.15);color:var(--blue-light);">6</div>
+      <div>
+        <div class="biz-card-title">Scale and Grow</div>
+        <div class="biz-card-sub">Month 7–12 · Only after 30+ paying happy users</div>
+      </div>
+    </div>
+    <span class="biz-chev" id="bchev-6">▼</span>
+  </div>
+  <div class="biz-card-body" id="bbody-6">
+    <div class="biz-warn">Do NOT start this phase until you have at least 30 paying users who are actively using the product. Growing a broken or under-used product just accelerates failure.</div>
+    <div class="biz-step-list">
+      <div class="biz-step"><div class="biz-step-num">6.1</div><div><div class="biz-step-title">Add Bombay High Court (Month 7–8)</div><div class="biz-step-desc">BHC is the second-highest volume court in India — large, tech-forward legal community. Doubles your total addressable market. By this point you know the rules engine build process from DHC — BHC should take half the time.</div><span class="biz-tag important">Revenue multiplier</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">6.2</div><div><div class="biz-step-title">Launch the Firm plan (Month 8–9)</div><div class="biz-step-desc">Team accounts, shared filing history, senior can see all filings by juniors. Moves you from individuals to firms — one sale, 5–10 seats. CAC stays the same but revenue per customer triples. Target firms with at least one active Pro user — upsell from bottom up.</div><span class="biz-tag go">Revenue leap</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">6.3</div><div><div class="biz-step-title">Build a referral programme</div><div class="biz-step-desc">Lawyers trust lawyers. "Refer a colleague, get one month free." The downloadable defect report already creates passive referrals every time a junior sends it to their senior. Make that loop explicit and reward it.</div><span class="biz-tag go">Low cost, high return</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">6.4</div><div><div class="biz-step-title">Publish your accuracy data publicly</div><div class="biz-step-desc">By Month 9 you'll have thousands of real filings analysed. Publish an anonymised accuracy report: "MyFiling.ai detected defects in X% of filings at DHC. Here are the most common errors." Drives organic search, LinkedIn shares, media coverage — all for free.</div><span class="biz-tag important">Credibility flywheel</span></div></div>
+      <div class="biz-step"><div class="biz-step-num">6.5</div><div><div class="biz-step-title">Explore fundraising (Month 10–12)</div><div class="biz-step-desc">With 50+ paying users, 90%+ accuracy, 2 courts covered — you have traction for investors. Target: iSPIRT, LetsVenture, Stellaris Venture Partners, Kalaari Capital. Use funding to hire a legal content manager and a second developer. Do NOT fundraise before you have real usage data.</div><span class="biz-tag">When ready</span></div></div>
+    </div>
+    <div style="background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.2);border-radius:10px;padding:12px;margin-top:4px;">
+      <div style="font-size:10px;font-weight:500;color:var(--teal-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Month 12 if you execute well</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+        <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Active users</div><div style="font-size:15px;font-weight:500;color:#fff;">200+</div></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Paying users</div><div style="font-size:15px;font-weight:500;color:#fff;">50–80</div></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">MRR</div><div style="font-size:15px;font-weight:500;color:#fff;">₹50–80K</div></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Courts live</div><div style="font-size:15px;font-weight:500;color:#fff;">DHC + BHC</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end biz tab -->
+
+<!-- ═══ WEEKDAY SCHEDULE ═══ -->
+<div id="view-weekday" class="hidden">
+
+<div class="dsec">
+  <div class="sec-lbl">Pre-dawn</div>
+  <div class="blk wd-blk" id="b-0445"><div class="bt c-dark">4:45 AM</div><div class="bc"><div class="bt2">Wake up. Cold water. No snooze.</div><div class="bs">Write: "Today I will..." Zero phone first hour.</div><span class="pill p-mind">mindset</span></div></div>
+  <div class="blk wd-blk" id="b-0500"><div class="bt c-purple">5:00–5:55</div><div class="bc"><div class="bt2">Study block #1 — peak brain time</div><div class="bs">50-min Pomodoro. Past papers, problems, concepts.</div><span class="pill p-exam">exam</span></div></div>
+  <div class="blk wd-blk" id="b-0555"><div class="bt c-gold">5:55–6:00</div><div class="bc"><div class="bt2">Gear up — leave for gym</div><div class="bs">Bag packed last night. Black coffee. Go.</div><span class="pill p-mind">prep</span></div></div>
+</div>
+
+<div class="dsec">
+  <div class="sec-lbl">Morning</div>
+
+  <!-- GYM BLOCK — expandable with full workout inside -->
+  <div class="blk wd-blk" id="b-0600">
+    <div class="bt c-teal">6:00–7:15</div>
+    <div class="bc">
+      <div class="bt2">GYM — lifts + abs + LISS cardio</div>
+      <div class="bs">Follow trainer program. Log sets. Abs after lifts. 15–20 min LISS last.</div>
+      <span class="pill p-gym">body</span>
+      <!-- Workout expand button — shows today's day type -->
+      <div id="gym-today-badge" style="margin-top:6px;"></div>
+      <button class="gym-expand-btn" onclick="toggleGymPanel('wd')" id="gym-btn-wd">
+        <span>View today's workout</span> <span class="chev-sm" id="gym-chev-wd">▼</span>
+      </button>
+      <div class="gym-panel" id="gym-panel-wd"></div>
+    </div>
+  </div>
+
+  <div class="blk wd-blk" id="b-0715"><div class="bt c-blue">7:15–7:50</div><div class="bc"><div class="bt2">Shower + black coffee (IF fasting)</div><div class="bs">Eating opens at 1 PM. Prep tomorrow's gym bag.</div><span class="pill p-if">fasting</span></div></div>
+  <div class="blk wd-blk" id="b-0750"><div class="bt c-gold">7:50–9:00</div><div class="bc"><div class="bt2">efilingcheck — deep work #1</div><div class="bs">One written goal. Outreach, build, market.</div><span class="pill p-biz">business</span></div></div>
+  <div class="blk wd-blk" id="b-0900"><div class="bt c-purple">9:00–9:25</div><div class="bc"><div class="bt2">Study block #2 — revision sprint</div><div class="bs">Flashcards, mind maps. 25 sharp minutes.</div><span class="pill p-exam">exam</span></div></div>
+  <div class="blk wd-blk" id="b-0925"><div class="bt c-gray">9:25–9:30</div><div class="bc"><div class="bt2">Dress sharp</div><div class="bs">Clothes laid out last night. Look like you own things.</div><span class="pill p-mind">mindset</span></div></div>
+</div>
+
+<div class="dsec">
+  <div class="sec-lbl">Commute + DHC</div>
+  <div class="blk wd-blk" id="b-0930"><div class="bt c-dim">9:30–10:00</div><div class="bc"><div class="bt2">Commute — English podcast/audiobook</div><div class="bs">BBC Learning English or Business English Pod.</div><span class="pill p-growth">growth</span></div></div>
+  <div class="blk wd-blk" id="b-1000"><div class="bt c-dim">10 AM–1 PM</div><div class="bc"><div class="bt2">DHC work — first half</div><div class="bs">Most focused person in the room.</div><span class="pill p-income">income</span></div></div>
+  <div class="blk wd-blk" id="b-1300"><div class="bt c-gold">1:00–1:30</div><div class="bc"><div class="bt2">Break fast — 40g+ protein meal</div><div class="bs">Eating window opens. 15-min efilingcheck sprint after.</div><span class="pill p-if">IF break</span></div></div>
+  <div class="blk wd-blk" id="b-1330"><div class="bt c-dim">1:30–5:00</div><div class="bc"><div class="bt2">DHC work — second half</div><div class="bs">Champions don't coast. Finish strong.</div><span class="pill p-income">income</span></div></div>
+</div>
+
+<div class="dsec">
+  <div class="sec-lbl">Evening — empire hours</div>
+  <div class="blk wd-blk" id="b-1700"><div class="bt c-dim">5:00–6:00</div><div class="bc"><div class="bt2">Commute home — decompress</div><div class="bs">Audiobook. Arrive ready to build.</div><span class="pill p-growth">growth</span></div></div>
+  <div class="blk wd-blk" id="b-1800"><div class="bt c-gold">6:00–7:30</div><div class="bc"><div class="bt2">efilingcheck — prime 90-min session</div><div class="bs">Phone silent. Build what replaces your salary.</div><span class="pill p-biz">business</span></div></div>
+  <div class="blk wd-blk" id="b-1930"><div class="bt c-purple">7:30–8:00</div><div class="bc"><div class="bt2">Study block #3 + read 15 pages</div><div class="bs">Exam revision then book. Brain fed every day.</div><span class="pill p-brain">brain</span></div></div>
+  <div class="blk wd-blk" id="b-2000"><div class="bt c-pink">8:00–9:00</div><div class="bc"><div class="bt2">Family &amp; friends — full presence</div><div class="bs">Phone DOWN. This is what you are building for.</div><span class="pill p-fam">family</span></div></div>
+  <div class="blk wd-blk" id="b-2100"><div class="bt c-blue">9:00–9:20</div><div class="bc"><div class="bt2">Dinner — close IF window</div><div class="bs">High protein. Last meal of the day.</div><span class="pill p-if">IF closes</span></div></div>
+  <div class="blk wd-blk" id="b-2120"><div class="bt c-teal">9:20–9:40</div><div class="bc"><div class="bt2">CEO journal + plan tomorrow</div><div class="bs">3 wins. 3 tasks. Pack gym bag. Lay out clothes.</div><span class="pill p-mind">CEO mindset</span></div></div>
+  <div class="blk wd-blk" id="b-2140"><div class="bt c-gray">9:40–9:55</div><div class="bc"><div class="bt2">Wind down — read, zero screens</div><div class="bs">No social media. Feed your mind wisely.</div><span class="pill p-rest">rest</span></div></div>
+  <div class="blk wd-blk" id="b-2155"><div class="bt c-teal">9:55 PM</div><div class="bc"><div class="bt2">Lights out. 7 hrs strategic recovery.</div><div class="bs">Muscles grow. Brain consolidates. Non-negotiable.</div><span class="pill p-gym">sleep</span></div></div>
+</div>
+
+<div class="green-box"><strong>Run days (Tue/Thu/Sat):</strong> Replace 6:00–6:40 PM with running, then efilingcheck 6:40–7:30 PM.</div>
+</div><!-- end weekday -->
+
+<!-- ═══ SUNDAY / HOLIDAY ═══ -->
+<div id="view-sunday" class="hidden">
+<div class="info-box">Recovery + reflection day. Still disciplined. The CEO rests intentionally.</div>
+<div class="dsec">
+  <div class="sec-lbl">Morning</div>
+  <div class="blk hd-blk" id="h-0600"><div class="bt c-dark">6:00 AM</div><div class="bc"><div class="bt2">Wake up — natural, no later than 6</div><div class="bs">Cold water. Journal. Lazy Sunday = lazy Monday.</div><span class="pill p-mind">mindset</span></div></div>
+  <div class="blk hd-blk" id="h-0615"><div class="bt c-teal">6:15–7:30</div><div class="bc"><div class="bt2">Long run — marathon training</div><div class="bs">Longest run of week. Wk1–4: 4–5km. Wk5–8: 7–8km. Wk9–12: 10–12km.</div><span class="pill p-run">marathon</span></div></div>
+  <div class="blk hd-blk" id="h-0730"><div class="bt c-blue">7:30–8:15</div><div class="bc"><div class="bt2">Shower + light stretch</div><div class="bs">Foam roll. Black coffee. Eating window opens 12 PM.</div><span class="pill p-rec">recovery</span></div></div>
+</div>
+<div class="dsec">
+  <div class="sec-lbl">Late morning</div>
+  <div class="blk hd-blk" id="h-0815"><div class="bt c-purple">8:15–10:00</div><div class="bc"><div class="bt2">efilingcheck — weekly strategy session</div><div class="bs">Review metrics. Plan week goals. Think CEO.</div><span class="pill p-biz">business</span></div></div>
+  <div class="blk hd-blk" id="h-1000"><div class="bt c-dim">10–11 AM</div><div class="bc"><div class="bt2">Deep reading — 40 pages</div><div class="bs">Double your weekday reading. Your intellectual edge.</div><span class="pill p-brain">brain</span></div></div>
+  <div class="blk hd-blk" id="h-1100"><div class="bt c-purple">11 AM–12 PM</div><div class="bc"><div class="bt2">English practice — speaking + writing</div><div class="bs">TED Talk shadowing. Write 10 sentences.</div><span class="pill p-eng">english</span></div></div>
+</div>
+<div class="dsec">
+  <div class="sec-lbl">Afternoon</div>
+  <div class="blk hd-blk" id="h-1200"><div class="bt c-gold">12–1:30 PM</div><div class="bc"><div class="bt2">Break fast — big high-protein meal</div><div class="bs">Cook properly. Fuel the week ahead.</div><span class="pill p-if">IF break</span></div></div>
+  <div class="blk hd-blk" id="h-1330"><div class="bt c-dim">1:30–3:30</div><div class="bc"><div class="bt2">Free time — recharge deliberately</div><div class="bs">Walk, nap, explore. Protect recovery.</div><span class="pill p-rest">free time</span></div></div>
+  <div class="blk hd-blk" id="h-1530"><div class="bt c-teal">3:30–5:00</div><div class="bc"><div class="bt2">Weekly review + next week planning</div><div class="bs">Rate each goal 1–10. Plan top action per goal.</div><span class="pill p-mind">CEO review</span></div></div>
+</div>
+<div class="dsec">
+  <div class="sec-lbl">Evening</div>
+  <div class="blk hd-blk" id="h-1700"><div class="bt c-pink">5:00–7:30</div><div class="bc"><div class="bt2">Family &amp; friends — extended 2.5 hrs</div><div class="bs">Phone down. Fully present. The WHY behind the hustle.</div><span class="pill p-fam">family</span></div></div>
+  <div class="blk hd-blk" id="h-1930"><div class="bt c-purple">7:30–8:30</div><div class="bc"><div class="bt2">Study block — exam weekly recap</div><div class="bs">Review weak areas. Set targets for next week.</div><span class="pill p-exam">exam</span></div></div>
+  <div class="blk hd-blk" id="h-2030"><div class="bt c-gold">8:30–9:00</div><div class="bc"><div class="bt2">Dinner — close IF window</div><div class="bs">High protein. Eating closes at 9 PM.</div><span class="pill p-if">IF closes</span></div></div>
+  <div class="blk hd-blk" id="h-2100"><div class="bt c-teal">9:00–9:30</div><div class="bc"><div class="bt2">Prep for Monday — CEO mode on</div><div class="bs">Gym bag packed. Week goals written. Clothes ready.</div><span class="pill p-mind">prep</span></div></div>
+  <div class="blk hd-blk" id="h-2130"><div class="bt c-gray">9:30 PM</div><div class="bc"><div class="bt2">Lights out — 7.5 hrs full recovery</div><div class="bs">Most important sleep of the week. You earned it.</div><span class="pill p-rest">sleep</span></div></div>
+</div>
+</div><!-- end sunday -->
+
+<!-- ═══ GOALS ═══ -->
+<div id="view-goals" class="hidden">
+<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Your 6 targets. Read when you feel lost. This is why you wake up at 4:45 AM.</div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#04342C;color:#9FE1CB;font-size:13px;font-weight:500;">DHC</div><div><div class="goal-main">Clear DHC Programmer exam</div><div class="goal-sub">Ready by 28 Aug 2026 · 72 study hours</div></div></div><div class="goal-body">1 hr study every weekday in two blocks. 3 hrs every Sunday. Phase 1: C, DSA, OS, DBMS (Jun 1–28). Phase 2: Networks, Web, Number Systems (Jun 29–Jul 19). Phase 3: Aptitude, English, GK (Jul 20–Aug 9). Phase 4: Mock tests + revision (Aug 10–28). Target: clear the exam and become permanent staff at DHC.</div></div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#04342C;">💪</div><div><div class="goal-main">Physique in 3 months</div><div class="goal-sub">Phase 2 trainer program + IF 16:8</div></div></div><div class="goal-body">Gym 6x/week. Push/Pull/Legs split with abs after every session. Fasted training 6 AM. Break fast at 1 PM with 40g+ protein. Track weights inside the gym block. Progress photos every 2 weeks. Trust the program.</div></div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#412402;">₹</div><div><div class="goal-main">efilingcheck: earn in 2 months</div><div class="goal-sub">Target: ₹20K+/month by week 8</div></div></div><div class="goal-body">Wk 1–4: Find 10 clients. Set up Razorpay. One clear offer. Wk 5–8: Close 3–5 paying clients. Referral engine. Wk 9–12: Scale to 10–20 clients. Systemise. Every session: does this action make money?</div></div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#04342C;">🏃</div><div><div class="goal-main">Running — marathon path</div><div class="goal-sub">3x weekday + Sunday long run</div></div></div><div class="goal-body">Month 1: 3–4 km easy. Month 2: 5 km continuous. Month 3: 10 km race. Register a real 10K event now — a deadline you cannot negotiate with.</div></div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#26215C;">🧠</div><div><div class="goal-main">CEO brain + confidence</div><div class="goal-sub">Read + journal + talk daily</div></div></div><div class="goal-body">20 pages/day = 3 books in 3 months. Month 1: 48 Laws of Power. Month 2: Think and Grow Rich. Month 3: Atomic Habits. CEO journal every night. Talk to 1 new person daily.</div></div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#042C53;">🗣️</div><div><div class="goal-main">English + communication</div><div class="goal-sub">Daily shadowing + voice notes</div></div></div><div class="goal-body">60-sec English voice note every day. Shadow speakers you admire — copy their words and rhythm. Watch English content on commute. Month 3 goal: confident 10-min conversation with a stranger.</div></div>
+<div class="goal-card"><div class="goal-icon-row"><div class="goal-icon" style="background:#4B1528;">❤️</div><div><div class="goal-main">Family &amp; friends</div><div class="goal-sub">1 hr weekday + 2.5 hrs Sunday</div></div></div><div class="goal-body">8–9 PM every weekday is locked. Phone down, full presence. Extended 5–7:30 PM on Sundays. You are building this life FOR them. Never forget it.</div></div>
+<div style="margin-top:14px;background:rgba(239,159,39,0.07);border:1px solid rgba(239,159,39,0.18);border-radius:10px;padding:13px;">
+  <div style="font-size:10px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">The one rule above all</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.6;font-style:italic;">"The man who keeps his word to himself — especially when no one is watching — is the most dangerous, unstoppable kind of man alive."</div>
+</div>
+</div>
+
+</div><!-- end wrap -->
+<div class="qbar" id="qbar">Loading...</div>
+
+<script>
+// ─── QUOTES ───
+const Q=["The man who controls his morning controls his destiny.","Discipline is doing what needs to be done even when you don't feel like it.","Weak men wait for motivation. Strong men create it.","Your future self is watching. Do not disappoint him.","Every rep, every page, every line of code compounds.","Abs are revealed in the kitchen. Build them in the gym.","efilingcheck doesn't build itself. You do.","Champions are made in the hours everyone else is sleeping.","Track your weights. If you don't track, you don't grow.","Progressive overload: slightly better than last week. Every week.","You are not tired. You are weak. Keep going.","Pain is temporary. Regret is forever. Choose the pain."];
+
+// ─── WORKOUT DATA ───
+const PUSH_EX = [
+  {n:'Incline Bench Press', sets:3, reps:'10', target:'Upper Chest'},
+  {n:'Incline DB Press',    sets:3, reps:'12', target:'Upper Chest'},
+  {n:'Flat DB Fly',         sets:3, reps:'15', target:'Mid/Inner Chest'},
+  {n:'Machine Incline Press',sets:3,reps:'12', target:'Upper Chest'},
+  {n:'DB Shoulder Press',   sets:3, reps:'10', target:'Front/Side Delts'},
+  {n:'Side Lateral Raises', sets:3, reps:'15', target:'Side Delts'},
+  {n:'Tricep Pushdown',     sets:3, reps:'12', target:'Triceps'},
+  {n:'Skull Crushers',      sets:3, reps:'12', target:'Triceps'}
+];
+const PULL_EX = [
+  {n:'Lat Pulldown',      sets:3, reps:'12', target:'Lats (Width)'},
+  {n:'T-Bar Row',         sets:3, reps:'12', target:'Mid Back'},
+  {n:'Seated Cable Row',  sets:3, reps:'12', target:'Mid Back'},
+  {n:'Face Pulls',        sets:3, reps:'12', target:'Rear Delts/Traps'},
+  {n:'DB Shrugs',         sets:3, reps:'15', target:'Upper Traps'},
+  {n:'DB Bicep Curls',    sets:3, reps:'12', target:'Biceps'},
+  {n:'Preacher Curls',    sets:3, reps:'12', target:'Biceps (Peak)'}
+];
+const LEGS_EX = [
+  {n:'Barbell Squats',   sets:4, reps:'10',       target:'Quads/Glutes'},
+  {n:'Leg Extension',    sets:3, reps:'15',       target:'Quads'},
+  {n:'Leg Press',        sets:3, reps:'12',       target:'Quads/Glutes'},
+  {n:'Leg Curls',        sets:3, reps:'12',       target:'Hamstrings'},
+  {n:'Walking Lunges',   sets:3, reps:'20 steps', target:'Quads/Glutes'},
+  {n:'Calf Raises',      sets:3, reps:'15',       target:'Calves'},
+  {n:'Back Extension',   sets:3, reps:'15',       target:'Lower Back/Glutes'}
+];
+
+// Abs rotate by weekday: Mon=Day1, Tue=Day2, Wed=Day3, Thu=Day4, Fri=Day5, Sat=Day6
+const ABS_DAYS = [
+  null, // Sun = rest
+  {label:'Day 1 — Upper Abs',    exs:[{n:'Crunches',sets:3,reps:'20',focus:'Upper Abs'},{n:'Toe Touches',sets:3,reps:'15',focus:'Upper Abs'}]},
+  {label:'Day 2 — Lower Abs',    exs:[{n:'Reverse Crunches',sets:3,reps:'15',focus:'Lower Abs'},{n:'Leg Raises',sets:3,reps:'12',focus:'Lower Abs'}]},
+  {label:'Day 3 — Obliques',     exs:[{n:'Bicycle Crunches',sets:3,reps:'20 each',focus:'Obliques'},{n:'Side Plank',sets:3,reps:'30s each',focus:'Obliques'}]},
+  {label:'Day 4 — Core Stability',exs:[{n:'Plank',sets:3,reps:'45–60s',focus:'Core'},{n:'Dead Bug',sets:3,reps:'12 each',focus:'Core'}]},
+  {label:'Day 5 — Upper + Lower', exs:[{n:'V-Ups',sets:3,reps:'12',focus:'Full Abs'},{n:'Mountain Climbers',sets:3,reps:'30s',focus:'Core + Cardio'}]},
+  {label:'Day 6 — Total Core',    exs:[{n:'Crunches',sets:3,reps:'20',focus:'Upper Abs'},{n:'Plank',sets:3,reps:'45–60s',focus:'Core'}]}
+];
+
+// DOW → workout type
+const DOW_TYPE  = ['rest','push','pull','legs','push','pull','legs'];
+const DOW_LABEL = ['Rest', 'Push','Pull','Legs','Push','Pull','Legs'];
+const DOW_EX    = [null, PUSH_EX, PULL_EX, LEGS_EX, PUSH_EX, PULL_EX, LEGS_EX];
+const DOW_COLOR = ['var(--muted)','var(--gold)','var(--blue-light)','var(--purple-light)','var(--gold)','var(--blue-light)','var(--purple-light)'];
+const DOW_BG    = ['var(--bg3)','rgba(239,159,39,0.12)','rgba(55,138,221,0.12)','rgba(127,119,221,0.12)','rgba(239,159,39,0.12)','rgba(55,138,221,0.12)','rgba(127,119,221,0.12)'];
+
+// ─── WEIGHT TRACKER STATE ───
+let activeWk = {push:1, pull:1, legs:1};
+
+function wKey(type,wk){ return `ceo_w_${type}_${wk}`; }
+function loadW(type,wk){ try{const d=localStorage.getItem(wKey(type,wk));return d?JSON.parse(d):{}}catch(e){return {};} }
+
+function renderTrackerInputs(type,wk,containerSuffix){
+  const exs = type==='push'?PUSH_EX:type==='pull'?PULL_EX:LEGS_EX;
+  const saved = loadW(type,wk);
+  let h='';
+  exs.forEach((ex,i)=>{
+    const v=saved[ex.n]||'';
+    h+=`<div class="tr-row"><div class="tr-name">${ex.n}</div><input type="number" placeholder="kg" min="0" max="999" step="0.5" value="${v}" id="wi_${type}_${wk}_${i}_${containerSuffix}" aria-label="${ex.n}"></div>`;
+  });
+  document.getElementById(`wt-inputs-${type}-${containerSuffix}`).innerHTML=h;
+}
+
+function switchWk(type,wk,btn,sfx){
+  activeWk[type]=wk;
+  document.querySelectorAll(`#wt-tabs-${type}-${sfx} .wk-tab`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrackerInputs(type,wk,sfx);
+}
+
+function saveWeights(type,sfx){
+  const wk=activeWk[type];
+  const exs=type==='push'?PUSH_EX:type==='pull'?PULL_EX:LEGS_EX;
+  const data={};
+  exs.forEach((ex,i)=>{
+    const el=document.getElementById(`wi_${type}_${wk}_${i}_${sfx}`);
+    if(el&&el.value)data[ex.n]=parseFloat(el.value);
+  });
+  try{localStorage.setItem(wKey(type,wk),JSON.stringify(data));}catch(e){}
+  const msg=document.getElementById(`saved-${type}-${sfx}`);
+  msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
+}
+
+function buildWorkoutPanel(dow, containerSuffix){
+  const type=DOW_TYPE[dow];
+  const exs=DOW_EX[dow];
+  const absDay=ABS_DAYS[dow];
+  const col=DOW_COLOR[dow];
+  const bg=DOW_BG[dow];
+
+  if(type==='rest'){
+    return `<div style="font-size:13px;color:var(--muted);padding:8px 0;">Rest day — no lifting. Active recovery. Sleep well.</div>`;
+  }
+
+  // Main exercises table
+  let mainHTML=`<div style="font-size:12px;font-weight:500;color:${col};margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;">${DOW_LABEL[dow]} Day — ${type==='push'?'Chest · Shoulders · Triceps':type==='pull'?'Back · Biceps · Rear Delts · Traps':'Quads · Hamstrings · Glutes · Calves'}</div>`;
+  mainHTML+=`<table class="ex-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th></tr></thead><tbody>`;
+  exs.forEach((ex,i)=>{
+    mainHTML+=`<tr><td><span class="ex-num">${i+1}</span><span class="ex-name">${ex.n}</span><br><span class="ex-target">${ex.target}</span></td><td>${ex.sets}</td><td>${ex.reps}</td></tr>`;
+  });
+  mainHTML+=`</tbody></table>`;
+
+  // Abs section
+  let absHTML='';
+  if(absDay){
+    absHTML+=`<div class="abs-header"><span>${absDay.label}</span></div>`;
+    absHTML+=`<table class="abs-table"><tbody>`;
+    absDay.exs.forEach((ex,i)=>{
+      absHTML+=`<tr><td><span class="ex-num" style="background:rgba(99,153,34,0.15);color:#9FE1CB;">${i+1}</span><span class="ex-name">${ex.n}</span><br><span class="abs-focus">${ex.focus}</span></td><td>${ex.sets}</td><td>${ex.reps}</td></tr>`;
+    });
+    absHTML+=`</tbody></table>`;
+    absHTML+=`<div style="font-size:11px;color:var(--muted);background:rgba(99,153,34,0.06);border:1px solid rgba(99,153,34,0.15);border-radius:6px;padding:7px 9px;margin-bottom:8px;">Abs order: Lifts → Abs → LISS Cardio &nbsp;|&nbsp; 30s rest between exercises</div>`;
+  }
+
+  // Cardio note
+  const cardioHTML=`<div class="cardio-note"><strong>LISS Cardio (after abs):</strong> 15–20 min treadmill walk / cycling / cross trainer. Moderate pace — can hold a conversation.</div>`;
+
+  // Weight tracker
+  const trackerHTML=`
+    <div class="tracker-box">
+      <div class="tracker-title">Weight tracker — <span>${DOW_LABEL[dow]} Day</span></div>
+      <div class="wk-tabs" id="wt-tabs-${type}-${containerSuffix}">
+        <button class="wk-tab active" onclick="switchWk('${type}',1,this,'${containerSuffix}')">Wk 1</button>
+        <button class="wk-tab" onclick="switchWk('${type}',2,this,'${containerSuffix}')">Wk 2</button>
+        <button class="wk-tab" onclick="switchWk('${type}',3,this,'${containerSuffix}')">Wk 3</button>
+        <button class="wk-tab" onclick="switchWk('${type}',4,this,'${containerSuffix}')">Wk 4</button>
+      </div>
+      <div id="wt-inputs-${type}-${containerSuffix}"></div>
+      <button class="save-btn" onclick="saveWeights('${type}','${containerSuffix}')">Save weights</button>
+      <div class="saved-ok" id="saved-${type}-${containerSuffix}">✓ Saved!</div>
+    </div>`;
+
+  return mainHTML + absHTML + cardioHTML + trackerHTML;
+}
+
+// Track which panels are open to avoid re-rendering
+const openPanels={};
+
+function toggleGymPanel(sfx){
+  const panel=document.getElementById(`gym-panel-${sfx}`);
+  const chev=document.getElementById(`gym-chev-${sfx}`);
+  const isOpen=panel.classList.contains('open');
+  if(!isOpen){
+    const dow=new Date().getDay();
+    if(!openPanels[sfx]){
+      panel.innerHTML=buildWorkoutPanel(dow,sfx);
+      openPanels[sfx]=true;
+      // render tracker inputs for week 1
+      const type=DOW_TYPE[dow];
+      if(type!=='rest') renderTrackerInputs(type,activeWk[type],sfx);
+    }
+    panel.classList.add('open');
+    chev.classList.add('rot');
+    document.getElementById(`gym-btn-${sfx}`).querySelector('span:first-child').textContent='Hide workout';
+  } else {
+    panel.classList.remove('open');
+    chev.classList.remove('rot');
+    document.getElementById(`gym-btn-${sfx}`).querySelector('span:first-child').textContent='View today\'s workout';
+  }
+}
+
+// Render today badge on gym block
+function renderGymBadge(){
+  const dow=new Date().getDay();
+  const type=DOW_TYPE[dow];
+  const col=DOW_COLOR[dow];
+  const bg=DOW_BG[dow];
+  const label=DOW_LABEL[dow];
+  const badge=document.getElementById('gym-today-badge');
+  if(!badge)return;
+  if(type==='rest'){
+    badge.innerHTML=`<span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);padding:2px 8px;border-radius:20px;">Rest day today</span>`;
+  } else {
+    const muscles=type==='push'?'Chest · Shoulders · Triceps':type==='pull'?'Back · Biceps · Rear Delts · Traps':'Quads · Hamstrings · Glutes · Calves';
+    badge.innerHTML=`<span style="font-size:10px;font-weight:500;background:${bg};border:1px solid ${col};color:${col};padding:2px 8px;border-radius:20px;">Today: ${label} — ${muscles}</span>`;
+  }
+}
+
+// ─── SCHEDULE DATA ───
+const WDS=[
+  {id:'b-0445',s:'04:45',e:'05:00',title:'Wake up — cold water, journal intention',desc:'Write "Today I will..." Zero phone first hour.',tag:'mindset',tc:'p-mind'},
+  {id:'b-0500',s:'05:00',e:'05:55',title:'Study block #1 — peak brain time',desc:'50-min Pomodoro. Past papers, practice problems, concepts.',tag:'exam',tc:'p-exam'},
+  {id:'b-0555',s:'05:55',e:'06:00',title:'Gear up — leave for gym',desc:'Bag packed last night. Black coffee. Walk out ready.',tag:'prep',tc:'p-mind'},
+  {id:'b-0600',s:'06:00',e:'07:15',title:'GYM — lifts + abs + 15–20 min LISS',desc:'Follow trainer program. Log every set. Abs after lifts. LISS cardio last.',tag:'body',tc:'p-gym'},
+  {id:'b-0715',s:'07:15',e:'07:50',title:'Shower + black coffee (IF fasting)',desc:'Eating window opens at 1 PM. Prep tomorrow\'s gym bag.',tag:'fasting',tc:'p-if'},
+  {id:'b-0750',s:'07:50',e:'09:00',title:'efilingcheck — deep work #1',desc:'Write one goal. Outreach, build, or market.',tag:'business',tc:'p-biz'},
+  {id:'b-0900',s:'09:00',e:'09:25',title:'Study block #2 — revision sprint',desc:'Flashcards, mind maps. 25 focused minutes.',tag:'exam',tc:'p-exam'},
+  {id:'b-0925',s:'09:25',e:'09:30',title:'Dress sharp',desc:'Clothes laid out last night. Look like you own things.',tag:'mindset',tc:'p-mind'},
+  {id:'b-0930',s:'09:30',e:'10:00',title:'Commute — English podcast/audiobook',desc:'BBC Learning English. 30 min = 180 hrs/year free.',tag:'growth',tc:'p-growth'},
+  {id:'b-1000',s:'10:00',e:'13:00',title:'DHC work — first half',desc:'Most focused person in the room.',tag:'income',tc:'p-income'},
+  {id:'b-1300',s:'13:00',e:'13:30',title:'Break fast — 40g+ protein meal',desc:'Eating window opens. 15-min efilingcheck sprint after.',tag:'IF break',tc:'p-if'},
+  {id:'b-1330',s:'13:30',e:'17:00',title:'DHC work — second half',desc:'Champions don\'t coast. Finish as strong as you started.',tag:'income',tc:'p-income'},
+  {id:'b-1700',s:'17:00',e:'18:00',title:'Commute home — decompress and reload',desc:'Audiobook. Arrive ready to build.',tag:'growth',tc:'p-growth'},
+  {id:'b-1800',s:'18:00',e:'19:30',title:'efilingcheck — prime 90-min session',desc:'Phone silent. Build what replaces your salary.',tag:'business',tc:'p-biz'},
+  {id:'b-1930',s:'19:30',e:'20:00',title:'Study block #3 + read 15 pages',desc:'Exam revision then book. Brain fed every day.',tag:'brain',tc:'p-brain'},
+  {id:'b-2000',s:'20:00',e:'21:00',title:'Family & friends — full presence',desc:'Phone DOWN. This is what you are building for.',tag:'family',tc:'p-fam'},
+  {id:'b-2100',s:'21:00',e:'21:20',title:'Dinner — close IF window',desc:'High protein. Last meal. Eating closes here.',tag:'IF closes',tc:'p-if'},
+  {id:'b-2120',s:'21:20',e:'21:40',title:'CEO journal + plan tomorrow',desc:'3 wins. 3 tasks. Pack gym bag. Zero morning decisions.',tag:'CEO mindset',tc:'p-mind'},
+  {id:'b-2140',s:'21:40',e:'21:55',title:'Wind down — read, zero screens',desc:'No social media before sleep.',tag:'rest',tc:'p-rest'},
+  {id:'b-2155',s:'21:55',e:'04:45',title:'Lights out — 7 hours strategic recovery',desc:'Muscles grow. Brain consolidates. Non-negotiable.',tag:'sleep',tc:'p-gym'}
+];
+const HDS=[
+  {id:'h-0600',s:'06:00',e:'06:15',title:'Wake up — natural, no later than 6',desc:'Cold water. Journal. Lazy Sunday = lazy Monday.',tag:'mindset',tc:'p-mind'},
+  {id:'h-0615',s:'06:15',e:'07:30',title:'Long run — marathon training',desc:'Longest run of week. Build distance weekly.',tag:'marathon',tc:'p-run'},
+  {id:'h-0730',s:'07:30',e:'08:15',title:'Shower + light stretch',desc:'Foam roll. Black coffee. Eating window opens 12 PM.',tag:'recovery',tc:'p-rec'},
+  {id:'h-0815',s:'08:15',e:'10:00',title:'efilingcheck — weekly strategy session',desc:'Review metrics. Plan week. Think CEO.',tag:'business',tc:'p-biz'},
+  {id:'h-1000',s:'10:00',e:'11:00',title:'Deep reading — 40 pages',desc:'Double weekday reading. Your intellectual edge.',tag:'brain',tc:'p-brain'},
+  {id:'h-1100',s:'11:00',e:'12:00',title:'English practice — speaking + writing',desc:'TED Talk shadowing. Write 10 sentences.',tag:'english',tc:'p-eng'},
+  {id:'h-1200',s:'12:00',e:'13:30',title:'Break fast — big high-protein meal',desc:'Eating window opens. Cook properly. Fuel the week.',tag:'IF break',tc:'p-if'},
+  {id:'h-1330',s:'13:30',e:'15:30',title:'Free time — recharge deliberately',desc:'Walk, nap, explore. Rest is part of the plan.',tag:'free time',tc:'p-rest'},
+  {id:'h-1530',s:'15:30',e:'17:00',title:'Weekly review + next week planning',desc:'Rate each goal 1–10. Top action per goal.',tag:'CEO review',tc:'p-mind'},
+  {id:'h-1700',s:'17:00',e:'19:30',title:'Family & friends — extended 2.5 hrs',desc:'Phone down. Fully present. The WHY behind the hustle.',tag:'family',tc:'p-fam'},
+  {id:'h-1930',s:'19:30',e:'20:30',title:'Study block — exam weekly recap',desc:'Review weak areas. Set next week targets.',tag:'exam',tc:'p-exam'},
+  {id:'h-2030',s:'20:30',e:'21:00',title:'Dinner — close IF window',desc:'High protein. Eating closes at 9 PM.',tag:'IF closes',tc:'p-if'},
+  {id:'h-2100',s:'21:00',e:'21:30',title:'Prep for Monday — CEO mode on',desc:'Gym bag. Week goals written. Clothes ready.',tag:'prep',tc:'p-mind'},
+  {id:'h-2130',s:'21:30',e:'06:00',title:'Lights out — 7.5 hrs full recovery',desc:'Sunday sleep is the most important of the week.',tag:'sleep',tc:'p-rest'}
+];
+
+function toM(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function fmtT(m){m=((m%1440)+1440)%1440;const h=Math.floor(m/60),mn=m%60,ap=h>=12?'PM':'AM',hh=h%12||12;return`${hh}:${String(mn).padStart(2,'0')} ${ap}`;}
+function getBlock(sc,nm){
+  for(const b of sc){
+    const s=toM(b.s),e=toM(b.e);
+    if(e>s){if(nm>=s&&nm<e)return{b,s,e};}
+    else{if(nm>=s||nm<e)return{b,s,e:e+1440};}
+  }return null;
+}
+
+// ─── HOLIDAY STATE ───
+const todayDow=new Date().getDay();
+let isHoliday=todayDow===0;
+try{const sv=localStorage.getItem('ceo_hol'),sd=localStorage.getItem('ceo_hdate');if(sv!==null&&sd===new Date().toDateString())isHoliday=sv==='true';}catch(e){}
+
+function saveHol(){try{localStorage.setItem('ceo_hol',String(isHoliday));localStorage.setItem('ceo_hdate',new Date().toDateString());}catch(e){}}
+function toggleHoliday(){isHoliday=!isHoliday;saveHol();updateModeUI();renderToday();}
+
+function updateModeUI(){
+  const tsw=document.getElementById('tsw'),tlbl=document.getElementById('tlbl');
+  const mwd=document.getElementById('mwd'),mhd=document.getElementById('mhd');
+  const nc=document.getElementById('nowCard');
+  if(isHoliday){
+    tsw.classList.add('on');tlbl.textContent='Holiday mode on';
+    mwd.classList.add('hidden');mhd.classList.remove('hidden');
+    document.getElementById('mhdtxt').textContent=todayDow===0?'Sunday':'Holiday';
+    nc.classList.add('hm');
+  }else{
+    tsw.classList.remove('on');tlbl.textContent='Mark as holiday';
+    mhd.classList.add('hidden');mwd.classList.remove('hidden');
+    nc.classList.remove('hm');
+  }
+}
+
+// ─── TODAY TAB ───
+const BG_MAP={'p-mind':'c-dark','p-exam':'c-purple','p-gym':'c-teal','p-biz':'c-gold','p-if':'c-gold','p-income':'c-dim','p-growth':'c-dim','p-run':'c-teal','p-brain':'c-purple','p-fam':'c-pink','p-rest':'c-gray','p-rec':'c-blue','p-eng':'c-blue'};
+
+function renderToday(){
+  const sc=isHoliday?HDS:WDS;
+  let h=`<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${isHoliday?'Sunday / Holiday — recovery + reflection day.':'Your full weekday battle plan.'}</div>`;
+  sc.forEach(b=>{
+    const bg=BG_MAP[b.tc]||'c-dim';
+    // For gym block in Today tab, add the same expandable workout
+    if(b.id==='b-0600' && !isHoliday){
+      h+=`<div class="blk today-blk" id="t-${b.id}">
+        <div class="bt ${bg}" style="min-width:80px;">${b.s}–${b.e}</div>
+        <div class="bc">
+          <div class="bt2">${b.title}</div>
+          <div class="bs">${b.desc}</div>
+          <span class="pill ${b.tc}">${b.tag}</span>
+          <div id="gym-today-badge-t" style="margin-top:6px;"></div>
+          <button class="gym-expand-btn" onclick="toggleGymPanel('td')" id="gym-btn-td">
+            <span>View today's workout</span> <span class="chev-sm" id="gym-chev-td">▼</span>
+          </button>
+          <div class="gym-panel" id="gym-panel-td"></div>
+        </div>
+      </div>`;
+    } else {
+      h+=`<div class="blk today-blk" id="t-${b.id}"><div class="bt ${bg}" style="min-width:80px;">${b.s}–${b.e}</div><div class="bc"><div class="bt2">${b.title}</div><div class="bs">${b.desc}</div><span class="pill ${b.tc}">${b.tag}</span></div></div>`;
+    }
+  });
+  document.getElementById('today-container').innerHTML=h;
+  // render today badge in today tab
+  renderGymBadgeIn('gym-today-badge-t');
+}
+
+function renderGymBadgeIn(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const dow=new Date().getDay();
+  const type=DOW_TYPE[dow];
+  const col=DOW_COLOR[dow];
+  const bg=DOW_BG[dow];
+  const label=DOW_LABEL[dow];
+  if(type==='rest'){
+    el.innerHTML=`<span style="font-size:10px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);padding:2px 8px;border-radius:20px;">Rest day today</span>`;
+  } else {
+    const muscles=type==='push'?'Chest · Shoulders · Triceps':type==='pull'?'Back · Biceps · Rear Delts · Traps':'Quads · Hamstrings · Glutes · Calves';
+    el.innerHTML=`<span style="font-size:10px;font-weight:500;background:${bg};border:1px solid ${col};color:${col};padding:2px 8px;border-radius:20px;">Today: ${label} — ${muscles}</span>`;
+  }
+}
+
+// ─── CLOCK + NOW CARD ───
+function tick(){
+  const now=new Date();
+  document.getElementById('clk').textContent=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dtxt').textContent=`${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+
+  const nm=now.getHours()*60+now.getMinutes();
+  const sc=isHoliday?HDS:WDS;
+  const res=getBlock(sc,nm);
+
+  document.querySelectorAll('.blk').forEach(el=>{
+    el.classList.remove('active-blk','ha','past');
+    const ab=el.querySelector('.abadge');if(ab)ab.remove();
+  });
+
+  if(res){
+    const{b,s,e}=res;
+    document.getElementById('nowT').textContent=b.title;
+    document.getElementById('nowD').textContent=b.desc;
+    let adjNm=nm;if(e>1440)adjNm=nm<s?nm+1440:nm;
+    const pct=Math.min(100,Math.max(0,(adjNm-s)/(e-s)*100));
+    document.getElementById('nowB').style.width=pct+'%';
+    const rem=e-adjNm,rh=Math.floor(rem/60),rm=rem%60;
+    document.getElementById('nS').textContent=fmtT(s);
+    document.getElementById('nE').textContent=fmtT(e);
+    document.getElementById('nL').textContent=rh>0?`${rh}h ${rm}m left`:`${rm}m left`;
+    document.getElementById('nTag').innerHTML=`<span class="pill ${b.tc}" style="margin-top:8px;display:inline-block;">${b.tag}</span>`;
+
+    function addA(elId,isH){
+      const el=document.getElementById(elId);if(!el)return;
+      el.classList.add('active-blk');if(isH)el.classList.add('ha');
+      const badge=document.createElement('span');
+      badge.className='abadge'+(isH?' hb':'');
+      badge.innerHTML='<div style="width:5px;height:5px;background:currentColor;border-radius:50%;opacity:.8;"></div> Now';
+      el.querySelector('.bc').appendChild(badge);
+    }
+    addA('t-'+b.id,isHoliday);
+    addA(b.id,isHoliday);
+
+    sc.forEach(bl=>{
+      if(toM(bl.s)<s&&bl.id!==b.id){
+        const e1=document.getElementById('t-'+bl.id);const e2=document.getElementById(bl.id);
+        if(e1)e1.classList.add('past');if(e2)e2.classList.add('past');
+      }
+    });
+  }
+}
+
+// ─── TABS ───
+function showTab(t){
+  ['today','workout','study','biz','weekday','sunday','goals'].forEach(x=>{
+    const el=document.getElementById('view-'+x);
+    if(el) el.classList.add('hidden');
+    const tb=document.getElementById('tab-'+x);
+    if(tb) tb.classList.remove('active');
+  });
+  document.getElementById('view-'+t).classList.remove('hidden');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='workout'){ renderSplitGrid(); updateAbsLabels(); }
+  if(t==='study'){ renderStudyToday(); }
+}
+
+// ─── BUSINESS TAB ───
+const bizOpen={};
+function toggleBiz(n){
+  const body=document.getElementById('bbody-'+n);
+  const chev=document.getElementById('bchev-'+n);
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  chev.classList.toggle('rot',!isOpen);
+}
+
+// ─── WORKOUT TAB HELPERS ───
+const WO_TYPES = ['rest','push','pull','legs','push','pull','legs'];
+const WO_LABELS = ['Rest','Push','Pull','Legs','Push','Pull','Legs'];
+const WO_COLS = ['var(--muted)','var(--gold)','var(--blue-light)','var(--purple-light)','var(--gold)','var(--blue-light)','var(--purple-light)'];
+const WO_BGS = ['var(--bg3)','rgba(239,159,39,0.12)','rgba(55,138,221,0.12)','rgba(127,119,221,0.12)','rgba(239,159,39,0.12)','rgba(55,138,221,0.12)','rgba(127,119,221,0.12)'];
+const DAY_NAMES_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Abs rotate Mon=Day1...Sat=Day6, Sun=rest
+const ABS_BY_DOW = [
+  null,
+  {label:'Day 1 · Upper Abs', rows:[['A1','Crunches','Upper Abs','3','20'],['A2','Toe Touches','Upper Abs','3','15']]},
+  {label:'Day 2 · Lower Abs', rows:[['A1','Reverse Crunches','Lower Abs','3','15'],['A2','Leg Raises','Lower Abs','3','12']]},
+  {label:'Day 3 · Obliques',  rows:[['A1','Bicycle Crunches','Obliques','3','20 each'],['A2','Side Plank','Obliques','3','30s each']]},
+  {label:'Day 4 · Core Stability',rows:[['A1','Plank','Core','3','45–60s'],['A2','Dead Bug','Core','3','12 each']]},
+  {label:'Day 5 · Upper + Lower',rows:[['A1','V-Ups','Full Abs','3','12'],['A2','Mountain Climbers','Core + Cardio','3','30s']]},
+  {label:'Day 6 · Total Core',rows:[['A1','Crunches','Upper Abs','3','20'],['A2','Plank','Core','3','45–60s']]}
+];
+
+// Update the abs divider labels + rows based on today's DOW (dynamic when user opens workout tab)
+function updateAbsLabels(){
+  const dow = new Date().getDay();
+  const abs = ABS_BY_DOW[dow];
+  ['push','pull','legs'].forEach(type=>{
+    const lbl = document.getElementById('abs-lbl-'+type);
+    if(!lbl) return;
+    if(!abs){ lbl.textContent='Abs — Rest day'; return; }
+    lbl.textContent = 'Abs — ' + abs.label;
+  });
+}
+
+function renderSplitGrid(){
+  const dow = new Date().getDay();
+  let h='';
+  for(let i=1;i<=6;i++){
+    const today=(i===dow);
+    const col=today?WO_COLS[i]:'var(--muted)';
+    const bg=today?WO_BGS[i]:'var(--bg3)';
+    const border=today?`1px solid ${WO_COLS[i]}`:'1px solid var(--border)';
+    h+=`<div style="background:${bg};border:${border};border-radius:8px;padding:8px 4px;text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">${DAY_NAMES_SHORT[i]}</div>
+      <div style="font-size:12px;font-weight:500;color:${col};">${WO_LABELS[i]}</div>
+      ${today?`<div style="font-size:9px;color:${WO_COLS[i]};margin-top:2px;letter-spacing:.06em;">TODAY</div>`:''}
+    </div>`;
+  }
+  h+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Sun</div><div style="font-size:12px;font-weight:500;color:var(--muted);">Rest</div></div>`;
+  document.getElementById('wo-split-grid').innerHTML=h;
+}
+
+// Expand/collapse workout day cards
+const woOpen={};
+function toggleWoDay(id){
+  const body=document.getElementById('wbody-'+id);
+  const chev=document.getElementById('wchev-'+id);
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  chev.classList.toggle('rot',!isOpen);
+  if(!isOpen && !woOpen[id] && ['push','pull','legs'].includes(id)){
+    woOpen[id]=true;
+    renderWoTrackerInputs(id, activeWoWk[id]);
+  }
+}
+
+// ─── WORKOUT TAB WEIGHT TRACKER ───
+const activeWoWk = {push:1, pull:1, legs:1};
+const WO_EX_NAMES = {
+  push:['Incline Bench Press','Incline DB Press','Flat DB Fly','Machine Incline Press','DB Shoulder Press','Side Lateral Raises','Tricep Pushdown','Skull Crushers'],
+  pull:['Lat Pulldown','T-Bar Row','Seated Cable Row','Face Pulls','DB Shrugs','DB Bicep Curls','Preacher Curls'],
+  legs:['Barbell Squats','Leg Extension','Leg Press','Leg Curls','Walking Lunges','Calf Raises','Back Extension']
+};
+
+function wKeyWo(type,wk){ return `ceo_wo_${type}_${wk}`; }
+function loadWo(type,wk){ try{const d=localStorage.getItem(wKeyWo(type,wk));return d?JSON.parse(d):{}}catch(e){return {};} }
+
+function renderWoTrackerInputs(type,wk){
+  const exs=WO_EX_NAMES[type];
+  const saved=loadWo(type,wk);
+  let h='';
+  exs.forEach((name,i)=>{
+    const v=saved[name]||'';
+    h+=`<div class="tr-row"><div class="tr-name">${name}</div><input type="number" placeholder="kg" min="0" max="999" step="0.5" value="${v}" id="wo_inp_${type}_${wk}_${i}" aria-label="${name} week ${wk}"></div>`;
+  });
+  document.getElementById(`wt-wo-${type}`).innerHTML=h;
+}
+
+function switchWkWo(type,wk,btn){
+  activeWoWk[type]=wk;
+  document.querySelectorAll(`#wt-tabs-${type}-wo .wk-tab`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWoTrackerInputs(type,wk);
+}
+
+function saveWoWeights(type){
+  const wk=activeWoWk[type];
+  const exs=WO_EX_NAMES[type];
+  const data={};
+  exs.forEach((name,i)=>{
+    const el=document.getElementById(`wo_inp_${type}_${wk}_${i}`);
+    if(el&&el.value) data[name]=parseFloat(el.value);
+  });
+  try{localStorage.setItem(wKeyWo(type,wk),JSON.stringify(data));}catch(e){}
+  const msg=document.getElementById(`wo-saved-${type}`);
+  msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000);
+}
+
+// ─── STORAGE: JSONBin.io — works from any device, any browser ───
+// SETUP (one-time, 2 min):
+//   1. Go to https://jsonbin.io  →  Sign up free
+//   2. Click "+ Create Bin"  →  paste {} as content  →  Create
+//   3. Copy the Bin ID from the URL (looks like: 6849abc...)
+//   4. Go to API Keys  →  Create Access Key  →  copy it
+//   5. Paste both below and redeploy
+const JSONBIN_ID  = '6a1be3acddf5aa59f77ae4af';
+const JSONBIN_KEY = '$2a$10$xfTsS.pS9sJxbT4fKLwR5.z4GL3mJibjYXVWd1g6oavP4/Xea2/P6';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
+
+let appData = { weights:{} };
+let _saveTimer = null;
+
+async function loadAppData(){
+  if(JSONBIN_ID === '6a1be3acddf5aa59f77ae4af'){
+    // fallback to localStorage until JSONBin is configured
+    try{ const d=localStorage.getItem('ceo_data'); if(d) appData=JSON.parse(d); }catch(e){}
+    showStorageBanner();
+    return;
+  }
+  try{
+    const r = await fetch(JSONBIN_URL+'/latest', {
+      headers:{ 'X-Access-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
+    });
+    if(r.ok){ const d=await r.json(); if(d && typeof d==='object') appData=d; }
+  }catch(e){ console.log('Load failed, using localStorage fallback'); try{ const d=localStorage.getItem('ceo_data'); if(d) appData=JSON.parse(d); }catch(e2){} }
+}
+
+async function saveAppData(){
+  // always save to localStorage as instant backup
+  try{ localStorage.setItem('ceo_data', JSON.stringify(appData)); }catch(e){}
+  if(JSONBIN_ID === '6a1be3acddf5aa59f77ae4af') return;
+  // debounce: wait 800ms after last change before writing to JSONBin
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async()=>{
+    try{
+      await fetch(JSONBIN_URL, {
+        method:'PUT',
+        headers:{ 'Content-Type':'application/json', 'X-Access-Key': JSONBIN_KEY },
+        body: JSON.stringify(appData)
+      });
+    }catch(e){ console.log('Remote save failed, data kept in localStorage'); }
+  }, 800);
+}
+
+function showStorageBanner(){
+  const b = document.getElementById('storage-banner');
+  if(b) b.style.display='flex';
+}
+
+function getWeight(type, wk){ return (appData.weights[type] && appData.weights[type][wk]) || {}; }
+function setWeight(type, wk, data){
+  if(!appData.weights[type]) appData.weights[type]={};
+  appData.weights[type][wk]=data;
+}
+
+// ─── WEIGHT TRACKER (migrated from localStorage) ───
+function wKeyWo(type,wk){ return `${type}_${wk}`; }
+function loadWo(type,wk){ return getWeight(type,wk); }
+
+function renderWoTrackerInputs(type,wk){
+  const exs=WO_EX_NAMES[type];
+  const saved=loadWo(type,wk);
+  let h='';
+  exs.forEach((name,i)=>{
+    const v=saved[name]||'';
+    h+=`<div class="tr-row"><div class="tr-name">${name}</div><input type="number" placeholder="kg" min="0" max="999" step="0.5" value="${v}" id="wo_inp_${type}_${wk}_${i}" aria-label="${name} week ${wk}"></div>`;
+  });
+  document.getElementById(`wt-wo-${type}`).innerHTML=h;
+}
+
+function switchWkWo(type,wk,btn){
+  activeWoWk[type]=wk;
+  document.querySelectorAll(`#wt-tabs-${type}-wo .wk-tab`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWoTrackerInputs(type,wk);
+}
+
+async function saveWoWeights(type){
+  const wk=activeWoWk[type];
+  const exs=WO_EX_NAMES[type];
+  const data={};
+  exs.forEach((name,i)=>{
+    const el=document.getElementById(`wo_inp_${type}_${wk}_${i}`);
+    if(el&&el.value) data[name]=parseFloat(el.value);
+  });
+  setWeight(type,wk,data);
+  await saveAppData();
+  const msg=document.getElementById(`wo-saved-${type}`);
+  msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000);
+}
+
+// ─── STUDY TAB JS ───
+const STUDY_SCHEDULE = [
+  {date:'Jun 1',day:'Mon',topic:'C Programming: Basics, Operators, Loops',hrs:'1h',phase:'p1'},
+  {date:'Jun 2',day:'Tue',topic:'C: Pointers & Arrays',hrs:'1h',phase:'p1'},
+  {date:'Jun 3',day:'Wed',topic:'C: Structures, Unions, Functions',hrs:'1h',phase:'p1'},
+  {date:'Jun 4',day:'Thu',topic:'C: File I/O, Pre/Post Increment (trace code)',hrs:'1h',phase:'p1'},
+  {date:'Jun 5',day:'Fri',topic:'C: Bitwise Ops + 20 MCQ practice',hrs:'1h',phase:'p1'},
+  {date:'Jun 6',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jun 7',day:'Sun',topic:'C Programming full revision + 30 MCQs (GeeksForGeeks)',hrs:'3h',phase:'p1'},
+  {date:'Jun 8',day:'Mon',topic:'DSA: Arrays, Stacks, Queues',hrs:'1h',phase:'p1'},
+  {date:'Jun 9',day:'Tue',topic:'DSA: Linked Lists (single, double, circular)',hrs:'1h',phase:'p1'},
+  {date:'Jun 10',day:'Wed',topic:'DSA: Trees – BST, traversals',hrs:'1h',phase:'p1'},
+  {date:'Jun 11',day:'Thu',topic:'DSA: Sorting algorithms + Big-O notation',hrs:'1h',phase:'p1'},
+  {date:'Jun 12',day:'Fri',topic:'DSA: Graphs, Hashing + practice MCQs',hrs:'1h',phase:'p1'},
+  {date:'Jun 13',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jun 14',day:'Sun',topic:'DSA full drill: trace questions + GATE CS MCQs',hrs:'3h',phase:'p1'},
+  {date:'Jun 15',day:'Mon',topic:'OS: Processes, Threads, Scheduling',hrs:'1h',phase:'p1'},
+  {date:'Jun 16',day:'Tue',topic:'OS: Memory Management, Paging, Virtual Memory',hrs:'1h',phase:'p1'},
+  {date:'Jun 17',day:'Wed',topic:'OS: Deadlock, File Systems, I/O',hrs:'1h',phase:'p1'},
+  {date:'Jun 18',day:'Thu',topic:'DBMS: ER Model, Keys, Integrity constraints',hrs:'1h',phase:'p1'},
+  {date:'Jun 19',day:'Fri',topic:'DBMS: Normalization 1NF–BCNF',hrs:'1h',phase:'p1'},
+  {date:'Jun 20',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jun 21',day:'Sun',topic:'OS + DBMS combined MCQ test (50 questions timed)',hrs:'3h',phase:'p1'},
+  {date:'Jun 22',day:'Mon',topic:'DBMS: SQL – SELECT, JOINs, GROUP BY',hrs:'1h',phase:'p1'},
+  {date:'Jun 23',day:'Tue',topic:'DBMS: Transactions, ACID, Concurrency',hrs:'1h',phase:'p1'},
+  {date:'Jun 24',day:'Wed',topic:'OOP: Classes, Inheritance, Polymorphism',hrs:'1h',phase:'p1'},
+  {date:'Jun 25',day:'Thu',topic:'OOP: Encapsulation, Abstract class, Interface',hrs:'1h',phase:'p1'},
+  {date:'Jun 26',day:'Fri',topic:'Phase 1 weak area revision',hrs:'1h',phase:'p1'},
+  {date:'Jun 27',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jun 28',day:'Sun',topic:'Phase 1 FULL MOCK TEST (60 tech questions, 60 min)',hrs:'3h',phase:'mock'},
+  {date:'Jun 29',day:'Mon',topic:'Networks: OSI 7 layers (memorize!)',hrs:'1h',phase:'p2'},
+  {date:'Jun 30',day:'Tue',topic:'Networks: TCP/IP, IP addressing, Subnetting',hrs:'1h',phase:'p2'},
+  {date:'Jul 1',day:'Wed',topic:'Networks: MAC, ARP, DNS, DHCP, Ports',hrs:'1h',phase:'p2'},
+  {date:'Jul 2',day:'Thu',topic:'Networks: HTTP vs HTTPS, SSL/TLS, Protocols',hrs:'1h',phase:'p2'},
+  {date:'Jul 3',day:'Fri',topic:'Security: Malware types, Antivirus, VPN',hrs:'1h',phase:'p2'},
+  {date:'Jul 4',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jul 5',day:'Sun',topic:'Networks full drill: 50 MCQs (port numbers, OSI focus)',hrs:'3h',phase:'p2'},
+  {date:'Jul 6',day:'Mon',topic:'Number Systems: Binary ↔ Decimal ↔ Hex ↔ Octal',hrs:'1h',phase:'p2'},
+  {date:'Jul 7',day:'Tue',topic:'Number Systems: Logic Gates (XOR, AND, OR, NOT, NAND)',hrs:'1h',phase:'p2'},
+  {date:'Jul 8',day:'Wed',topic:'Storage: SSD/HDD, RAM, Cache, Nibble/Byte hierarchy',hrs:'1h',phase:'p2'},
+  {date:'Jul 9',day:'Thu',topic:'Web Tech: HTTP, REST, Client-Server, Cookies/Sessions',hrs:'1h',phase:'p2'},
+  {date:'Jul 10',day:'Fri',topic:'Cloud/SE: SaaS/IaaS/PaaS, DLL, SDLC basics',hrs:'1h',phase:'p2'},
+  {date:'Jul 11',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jul 12',day:'Sun',topic:'Networks + Number Systems MOCK (50 Qs)',hrs:'3h',phase:'p2'},
+  {date:'Jul 13',day:'Mon',topic:'MS Office: Word, Excel, PowerPoint shortcuts',hrs:'1h',phase:'p2'},
+  {date:'Jul 14',day:'Tue',topic:'Software Engineering: SDLC, Testing, UML basics',hrs:'1h',phase:'p2'},
+  {date:'Jul 15',day:'Wed',topic:'Phase 2 revision + 30 MCQ drill',hrs:'1h',phase:'p2'},
+  {date:'Jul 16',day:'Thu',topic:'Data Communication: Transmission media, Bandwidth',hrs:'1h',phase:'p2'},
+  {date:'Jul 17',day:'Fri',topic:'Phase 2 weak area review',hrs:'1h',phase:'p2'},
+  {date:'Jul 18',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jul 19',day:'Sun',topic:'Phase 1+2 COMBINED MOCK (75 tech Qs, 75 min)',hrs:'3h',phase:'mock'},
+  {date:'Jul 20',day:'Mon',topic:'Reasoning: Series (number + alpha-numeric)',hrs:'1h',phase:'p3'},
+  {date:'Jul 21',day:'Tue',topic:'Reasoning: Coding-Decoding, Directions',hrs:'1h',phase:'p3'},
+  {date:'Jul 22',day:'Wed',topic:'Reasoning: Blood Relations, Seating Arrangement',hrs:'1h',phase:'p3'},
+  {date:'Jul 23',day:'Thu',topic:'Reasoning: Puzzles + City ordering',hrs:'1h',phase:'p3'},
+  {date:'Jul 24',day:'Fri',topic:'Quant: Profit/Loss, SI/CI, Ratio',hrs:'1h',phase:'p3'},
+  {date:'Jul 25',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Jul 26',day:'Sun',topic:'Reasoning + Quant timed drill (40 Qs in 40 min)',hrs:'3h',phase:'p3'},
+  {date:'Jul 27',day:'Mon',topic:'Quant: Mixtures, Averages, Pipes & Cisterns',hrs:'1h',phase:'p3'},
+  {date:'Jul 28',day:'Tue',topic:'Quant: Time-Work, Time-Speed-Distance',hrs:'1h',phase:'p3'},
+  {date:'Jul 29',day:'Wed',topic:'English: Idioms, One-word substitution, Vocab',hrs:'1h',phase:'p3'},
+  {date:'Jul 30',day:'Thu',topic:'English: Antonyms, Synonyms, Fill-in-blanks',hrs:'1h',phase:'p3'},
+  {date:'Jul 31',day:'Fri',topic:'English: Grammar rules + Comprehension practice',hrs:'1h',phase:'p3'},
+  {date:'Aug 1',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Aug 2',day:'Sun',topic:'Full aptitude + English section mock (45 Qs)',hrs:'3h',phase:'p3'},
+  {date:'Aug 3',day:'Mon',topic:'GK: Indian Constitution, Polity, Courts',hrs:'1h',phase:'p3'},
+  {date:'Aug 4',day:'Tue',topic:'GK: Science & Tech, ISRO launches, Space',hrs:'1h',phase:'p3'},
+  {date:'Aug 5',day:'Wed',topic:'GK: Awards, Sports, Govt Schemes',hrs:'1h',phase:'p3'},
+  {date:'Aug 6',day:'Thu',topic:'GK: Current Affairs (July–Aug 2026)',hrs:'1h',phase:'p3'},
+  {date:'Aug 7',day:'Fri',topic:'Phase 3 full revision + weak spot drill',hrs:'1h',phase:'p3'},
+  {date:'Aug 8',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Aug 9',day:'Sun',topic:'Phase 3 MOCK (40 aptitude+GK Qs, 40 min)',hrs:'3h',phase:'mock'},
+  {date:'Aug 10',day:'Mon',topic:'Revision: C + DSA flashcard drill',hrs:'1h',phase:'p4'},
+  {date:'Aug 11',day:'Tue',topic:'Revision: DBMS normalization + SQL queries',hrs:'1h',phase:'p4'},
+  {date:'Aug 12',day:'Wed',topic:'Revision: OS scheduling + memory concepts',hrs:'1h',phase:'p4'},
+  {date:'Aug 13',day:'Thu',topic:'Revision: Networks OSI + port numbers rapid fire',hrs:'1h',phase:'p4'},
+  {date:'Aug 14',day:'Fri',topic:'Revision: Number systems conversions timed practice',hrs:'1h',phase:'p4'},
+  {date:'Aug 15',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Aug 16',day:'Sun',topic:'FULL MOCK TEST 1 – All sections (75 Qs, 75 min). Review every wrong answer.',hrs:'3h',phase:'mock'},
+  {date:'Aug 17',day:'Mon',topic:'Error analysis: Top 10 wrong answers from Mock 1',hrs:'1h',phase:'p4'},
+  {date:'Aug 18',day:'Tue',topic:'Revision: Reasoning + Quant quick-fire 30 Qs',hrs:'1h',phase:'p4'},
+  {date:'Aug 19',day:'Wed',topic:'Revision: English vocab + idioms rapid recall',hrs:'1h',phase:'p4'},
+  {date:'Aug 20',day:'Thu',topic:'Revision: Current affairs + GK last 2 months',hrs:'1h',phase:'p4'},
+  {date:'Aug 21',day:'Fri',topic:'Revision: C code tracing + output prediction',hrs:'1h',phase:'p4'},
+  {date:'Aug 22',day:'Sat',topic:'OFF',hrs:'',phase:'off'},
+  {date:'Aug 23',day:'Sun',topic:'FULL MOCK TEST 2 – Simulate real exam. Analyse gaps.',hrs:'3h',phase:'mock'},
+  {date:'Aug 24',day:'Mon',topic:'Final revision: DSA + Networks cheat sheet',hrs:'1h',phase:'p4'},
+  {date:'Aug 25',day:'Tue',topic:'Final revision: DBMS + OS key concepts',hrs:'1h',phase:'p4'},
+  {date:'Aug 26',day:'Wed',topic:'Final revision: Aptitude formulas + shortcuts',hrs:'1h',phase:'p4'},
+  {date:'Aug 27',day:'Thu',topic:'Final revision: GK + Current Affairs',hrs:'1h',phase:'p4'},
+  {date:'Aug 28',day:'Fri',topic:'READY — Light review, relax. You are prepared.',hrs:'1h',phase:'p4'},
+];
+
+const PHASE_COLORS = {p1:'#1D9E75',p2:'#378ADD',p3:'#EF9F27',p4:'#D85A30',mock:'#D4537E',off:'var(--dim)'};
+
+function getTodayStudyEntry(){
+  const now = new Date();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayStr = months[now.getMonth()] + ' ' + now.getDate();
+  return STUDY_SCHEDULE.find(s => s.date === todayStr) || null;
+}
+
+function renderStudyToday(){
+  const entry = getTodayStudyEntry();
+  const card = document.getElementById('study-today-card');
+  if(!card) return;
+  if(!entry){
+    card.innerHTML=`<div class="st-today-box" style="background:rgba(255,255,255,0.04);border-color:var(--border);"><div class="st-today-date">No study scheduled today</div><div class="st-today-topic" style="font-size:14px;color:var(--muted);">This date is outside the study plan period (Jun 1 – Aug 28, 2026)</div></div>`;
+  } else if(entry.phase==='off'){
+    card.innerHTML=`<div class="st-today-box" style="background:rgba(255,255,255,0.04);border-color:var(--border);"><div class="st-today-date">${entry.date} · ${entry.day}</div><div class="st-today-topic" style="color:var(--muted);">REST DAY</div><div class="st-today-meta">No studying today. Recover. Come back stronger tomorrow.</div></div>`;
+  } else {
+    const col = PHASE_COLORS[entry.phase];
+    const isMock = entry.phase==='mock';
+    card.innerHTML=`<div class="st-today-box" style="border-color:${col};background:${isMock?'rgba(212,83,126,0.08)':'rgba(29,158,117,0.08)'};">
+      <div class="st-today-date" style="color:${col};">${entry.date} · ${entry.day} · ${entry.hrs}</div>
+      <div class="st-today-topic">${entry.topic}</div>
+      <div class="st-today-meta">${isMock?'Mock test day — simulate exam conditions. Time yourself strictly.':'Study this during your 9:00–9:25 AM block + 7:30–8:00 PM block. Total = 1 hr today.'}</div>
+    </div>`;
+  }
+  // Upcoming 5 days
+  const now2 = new Date();
+  const months2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayStr2 = months2[now2.getMonth()] + ' ' + now2.getDate();
+  const idx = STUDY_SCHEDULE.findIndex(s=>s.date===todayStr2);
+  const upcoming = STUDY_SCHEDULE.slice(idx+1, idx+6);
+  const wl = document.getElementById('study-week-list');
+  if(!wl) return;
+  if(!upcoming.length){ wl.innerHTML='<div style="font-size:12px;color:var(--muted);">No more sessions scheduled.</div>'; return; }
+  wl.innerHTML = upcoming.map(s=>{
+    const col = PHASE_COLORS[s.phase]||'var(--dim)';
+    const dotCls = 'ph-dot-'+(s.phase==='off'?'off':s.phase);
+    return `<div class="st-week-item"><div class="${dotCls}"></div><div class="st-week-date">${s.date} ${s.day}</div><div class="st-week-topic" style="${s.phase==='off'?'color:var(--dim);':''}">${s.phase==='off'?'REST':s.topic}</div><div class="st-week-hrs" style="color:${col};">${s.hrs}</div></div>`;
+  }).join('');
+}
+
+function showStudy(panel){
+  ['overview','today-topic','syllabus','resources','tips'].forEach(p=>{
+    const el=document.getElementById('sp-'+p); if(el) el.classList.add('hidden');
+    const tb=document.getElementById('stab-'+p); if(tb) tb.classList.remove('active');
+  });
+  const el=document.getElementById('sp-'+panel); if(el) el.classList.remove('hidden');
+  const tb=document.getElementById('stab-'+panel); if(tb) tb.classList.add('active');
+  if(panel==='today-topic') renderStudyToday();
+}
+let qi=0;
+function rotQ(){document.getElementById('qbar').textContent='"'+Q[qi%Q.length]+'"';qi++;}
+
+// ─── INIT ───
+async function init(){
+  await loadAppData();
+  updateModeUI();
+  renderToday();
+  renderGymBadge();
+  rotQ(); setInterval(rotQ,8000);
+  tick(); setInterval(tick,1000);
+}
+init();
+</script>
+</body>
+</html>
